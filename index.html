@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation Bar -->
+    <div
+      class="border-b border w-full p-2.5 border-gray-300 sticky top-0 z-40 bg-white/80 backdrop-blur-sm flex justify-center"
+    >
+      <div
+        class="px-2 text-xs text-gray-600 flex items-center gap-4 sm:gap-6 md:gap-8 lg:gap-13 overflow-x-auto"
+      >
+        <a href="/" class="flex-shrink-0"
+          ><img src="/assets/apple-icon.png" alt="logo" class="h-4 mb-0.5"
+        /></a>
+        <a
+          href="https://www.apple.com/store"
+          class="whitespace-nowrap hover:text-black transition"
+          >Store</a
+        >
+        <a
+          href="https://www.apple.com/mac"
+          class="whitespace-nowrap hover:text-black transition"
+          >Mac</a
+        >
+        <a
+          href="https://www.apple.com/ipad"
+          class="whitespace-nowrap hover:text-black transition"
+          >iPad</a
+        >
+        <a
+          href="https://www.apple.com/iphone"
+          class="whitespace-nowrap hover:text-black transition"
+          >iPhone</a
+        >
+        <a
+          href="https://www.apple.com/watch"
+          class="whitespace-nowrap hover:text-black transition"
+          >Watch</a
+        >
+        <a
+          href="https://www.apple.com/airpods"
+          class="whitespace-nowrap hover:text-black transition"
+          >AirPods</a
+        >
+        <a
+          href="https://www.apple.com/tv-home"
+          class="whitespace-nowrap hover:text-black transition"
+          >TV & Home</a
+        >
+        <a
+          href="https://www.apple.com/services"
+          class="whitespace-nowrap hover:text-black transition"
+          >Entertainment</a
+        >
+        <a
+          href="https://www.apple.com/accessories/all"
+          class="whitespace-nowrap hover:text-black transition"
+          >Accessories</a
+        >
+        <a
+          href="https://support.apple.com"
+          class="whitespace-nowrap hover:text-black transition"
+          >Support</a
+        >
+      </div>
+    </div>
+
+    <!-- Alert Banner -->
+    <div
+      id="alertBanner"
+      class="bg-blue-100 border-blue-500 text-blue-700 p-4 mb-0 relative z-30"
+    >
+      <div class="flex items-center justify-between">
+        <div class="flex items-center flex-1">
+          <p class="text-sm">
+            <strong>Notice:</strong> This website is developed based on Apple
+            Inc. marketing website UI for demonstration purpose only.
+          </p>
+        </div>
+        <button
+          onclick="
+            document.getElementById('alertBanner').style.display = 'none'
+          "
+          class="ml-4 text-blue-700 hover:text-blue-900 font-bold text-lg leading-none focus:outline-none"
+          aria-label="Close alert"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Event Hero Section -->
+    <section
+      style="background-image: url(&quot;/assets/hero_large.jpg&quot;)"
+      class="min-h-96 sm:min-h-108 md:h-138 bg-cover bg-center flex items-end justify-center p-4 sm:p-8 md:p-15"
+    >
+      <div class="w-full max-w-2xl">
+        <p class="text-white text-base sm:text-lg md:text-xl text-center">
+          Introducing iPhone Duo, iPhone 18 Pro, Apple Watch Series 12,<br />
+          Apple Watch Ultra 4, and AirPods 5.
+        </p>
+        <div class="flex justify-center mt-4 sm:mt-6">
+          <a href="https://www.apple.com/apple-events/">
+            <button
+              class="bg-white rounded-full p-2.5 hover:bg-gray-100 hover:cursor-pointer px-4 sm:px-6 text-sm sm:text-md transition"
+            >
+              Watch the event
+            </button>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- iPhone Duo Section -->
+    <section
+      class="space-y-4 bg-[#F6F5F8] p-4 sm:p-8 md:p-12 pt-12 sm:pt-18 pb-0 md:pb-0"
+    >
+      <h1
+        class="text-center text-4xl sm:text-5xl md:text-6xl font-medium text-gray-800"
+      >
+        iPhone Duo
+      </h1>
+      <p class="text-gray-500 text-base sm:text-lg md:text-xl text-center">
+        The largest iPhone display ever. Foldable, posable, standable.<br />
+        Featuring unique iOS experiences for ultimate versatility.
+      </p>
+      <p class="text-gray-500 font-light text-xs sm:text-sm text-center">
+        Pre-order starting at 5:00 a.m. PT on 10.16 <br />Available starting
+        10.23
+      </p>
+      <div class="flex flex-col sm:flex-row justify-center mt-6 gap-4">
+        <a href="https://www.apple.com/iphone-duo/">
+          <button
+            class="w-full sm:w-auto bg-black text-white border rounded-full p-2.5 hover:bg-gray-800 transition px-6 text-sm sm:text-md"
+          >
+            Learn More
+          </button>
+        </a>
+        <a href="https://www.apple.com/us/shop/goto/buy_iphone/iphone_duo">
+          <button
+            class="w-full sm:w-auto bg-white hover:bg-black hover:text-white duration-300 border rounded-full p-2.5 px-6 text-sm sm:text-md transition"
+          >
+            View Pricing
+          </button>
+        </a>
+      </div>
+      <div class="flex justify-center">
+        <video src="/assets/videos/large.mp4" autoplay></video>
+      </div>
+    </section>
+
+    <!-- iPhone 18 Pro Section -->
+    <section class="space-y-4 bg-black p-4 sm:p-8 md:p-12 py-12 sm:py-18">
+      <h1
+        class="text-center text-4xl sm:text-5xl md:text-6xl font-medium text-white"
+      >
+        iPhone 18 Pro
+      </h1>
+      <p class="text-gray-400 text-base sm:text-lg md:text-xl text-center">
+        The largest iPhone display ever. Foldable, posable, standable.<br />
+        Featuring unique iOS experiences for ultimate versatility.
+      </p>
+      <p class="text-gray-400 font-light text-xs sm:text-sm text-center">
+        Pre-order starting at 5:00 a.m. PT on 10.16 <br />Available starting
+        10.23
+      </p>
+      <div class="flex flex-col sm:flex-row justify-center mt-6 gap-4">
+        <a href="https://www.apple.com/iphone-18-pro/">
+          <button
+            class="w-full sm:w-auto bg-white text-black border rounded-full p-2.5 hover:bg-gray-200 transition px-6 text-sm sm:text-md"
+          >
+            Learn More
+          </button>
+        </a>
+        <a href="https://www.apple.com/us/shop/goto/buy_iphone/iphone_18_pro">
+          <button
+            class="w-full sm:w-auto border-white text-white duration-300 hover:bg-white hover:text-black border rounded-full p-2.5 px-6 text-sm sm:text-md transition"
+          >
+            View Pricing
+          </button>
+        </a>
+      </div>
+      <div class="flex justify-center pb-8">
+        <video
+          src="/assets/videos/iphone.mp4"
+          autoplay
+          class="w-full max-w-4xl"
+        ></video>
+      </div>
+    </section>
+
+    <footer
+      class="flex justify-center text-xs p-4 bg-black/80 text-white/80 font-light text-center"
+    >
+      <p>Copyright © 2026 Apple Inc. All rights reserved.</p>
+    </footer>
+  </body>
+</html>
