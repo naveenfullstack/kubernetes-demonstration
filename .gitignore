@@ -1,2 +1,4 @@
-/terraform/env/prod/.terraform
+/terraform/env/prod/s.terraform
 /terraform/env/prod/.terraform.lock.hcl
+/terraform/env/prod/.terraform
+/next/node_modules

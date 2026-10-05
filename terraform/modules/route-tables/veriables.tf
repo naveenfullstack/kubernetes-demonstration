@@ -13,7 +13,3 @@ variable gateway_id {
 variable name {
   type        = string
 }
-
-variable public_subnet_1_a {
-  type        = string
-}

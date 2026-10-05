@@ -32,6 +32,8 @@ module "vpc" {
 
   name        = var.name
   environment = var.environment
+  public_route_table = module.route-tables.public_route_table_id
+  private_route_table = module.route-tables.private_route_table_id
 }
 
 module "route-tables" {
@@ -41,7 +43,6 @@ module "route-tables" {
   vpc_id = module.vpc.vpc_id
   gateway_id = aws_internet_gateway.igw.id
   name        = var.name
-  public_subnet_1_a = module.vpc.public_subnet_1_a_id
 }
 
 module "iam" {
@@ -67,5 +68,5 @@ module "ec2" {
   instance_type = var.instance_type
   subnet_id = module.vpc.public_subnet_1_a_id
   jenkins_sg = module.sg.jenkins_security_group
-  iam_role = module.iam.iam_role_name
+  iam_ssm_profile = module.iam.iam_ssm_profile_name
 }

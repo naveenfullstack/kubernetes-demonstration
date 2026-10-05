@@ -1,6 +1,6 @@
 # Route Tables
 
-resource "aws_route_table" "jenkins_route_table_public" {
+resource "aws_route_table" "public_route_table" {
   vpc_id = var.vpc_id
 
   route {
@@ -14,9 +14,24 @@ resource "aws_route_table" "jenkins_route_table_public" {
   }
 }
 
-# "assign" the route table to the subnet
+# ---------------------------------------------------------
+# Make Public Route Table the Main Route Table
+# ---------------------------------------------------------
 
-resource "aws_route_table_association" "jenkins_subnet_public_1a" {
-  subnet_id      = var.public_subnet_1_a
-  route_table_id = aws_route_table.jenkins_route_table_public.id
+resource "aws_main_route_table_association" "main" {
+  vpc_id         = var.vpc_id
+  route_table_id = aws_route_table.public_route_table.id
+}
+
+# ---------------------------------------------------------
+# Private Route Table
+# ---------------------------------------------------------
+
+resource "aws_route_table" "private_route_table" {
+  vpc_id = var.vpc_id
+
+  tags = {
+    Name        = "${var.name}-private-route-table-${var.environment}"
+    Environment = var.environment
+  }
 }

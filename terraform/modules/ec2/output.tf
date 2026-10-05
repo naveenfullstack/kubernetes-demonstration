@@ -3,5 +3,5 @@ output "instance_id" {
 }
 
 output "jenkins_public_ip" {
-    value = aws_eip.othm_jenkings_ip.domain
+    value = aws_eip.othm_jenkings_ip.public_ip
 }

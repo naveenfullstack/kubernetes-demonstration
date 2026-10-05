@@ -45,7 +45,7 @@ resource "aws_instance" "othm_jenkings_ec2" {
   # The Elastic IP will be attached separately.
   associate_public_ip_address = true
 
-  iam_instance_profile = var.iam_role
+  iam_instance_profile = var.iam_ssm_profile
 
   root_block_device { 
     volume_size = 30 

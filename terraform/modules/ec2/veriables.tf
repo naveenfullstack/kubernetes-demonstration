@@ -18,6 +18,6 @@ variable jenkins_sg {
   type        = string
 }
 
-variable iam_role {
+variable iam_ssm_profile {
   type        = string
 }
