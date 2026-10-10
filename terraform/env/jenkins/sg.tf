@@ -2,10 +2,10 @@
 # For Jenkings EC2 Instance
 # ---------------------------------------------------------
 
-resource "aws_security_group" "othm_jenkings_sg" {
-  name        = "${var.name}-jenkings-sg-${var.environment}"
+resource "aws_security_group" "jenkings_sg" {
+  name        = "${var.name}-sg-${var.environment}"
   description = "Security group for jenkings ec2"
-  vpc_id      = var.vpc_id
+  vpc_id      = aws_vpc.jenkins_vpc.id
   # HTTP
   ingress {
     description = "Allow HTTP"
@@ -43,6 +43,6 @@ resource "aws_security_group" "othm_jenkings_sg" {
   }
 
   tags = {
-    Name = "${var.name}-jenkings-sg"
+    Name = "${var.name}-sg-${var.environment}"
   }
 }

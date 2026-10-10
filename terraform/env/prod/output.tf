@@ -2,10 +2,10 @@ output "vpc_id" {
    value = module.vpc.vpc_id
 }
 
-output "jenkins_ec2_server_id" {
-   value = module.ec2.instance_id
-}
+# output "eks_cluster_id" {
+#    value = module.eks.cluster_id
+# }
 
-output "jenkins_ec2_public_ip" {
-   value = module.ec2.jenkins_public_ip
-}
+# output "eks_cluster_endpoint" {
+#    value = module.eks.cluster_endpoint
+# }

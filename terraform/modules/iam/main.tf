@@ -1,54 +1,83 @@
-# ---------------------------------------------------------
-# IAM Role for Resources
-# ---------------------------------------------------------
+# =========================================================
+# EKS CLUSTER ROLE
+# =========================================================
 
-resource "aws_iam_role" "othm_iam" {
-  name = "${var.name}-iam-role-${var.environment}"
+data "aws_iam_policy_document" "eks_cluster_assume_role" {
+  statement {
+    effect = "Allow"
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    principals {
+      type        = "Service"
+      identifiers = ["eks.amazonaws.com"]
+    }
 
-    Statement = [
-      {
-        Effect = "Allow"
-
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-
-        Action = "sts:AssumeRole"
-      }
+    actions = [
+      "sts:AssumeRole"
     ]
-  })
-
-  tags = {
-    Name = "${var.name}-resources-role"
   }
 }
 
-# ---------------------------------------------------------
-# SSM Access for IAM
-# ---------------------------------------------------------
+resource "aws_iam_role" "eks_cluster" {
+  name = "${var.name}-eks-cluster-role-${var.environment}"
 
-resource "aws_iam_role_policy_attachment" "othm_ssm" {
-  role       = aws_iam_role.othm_iam.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  assume_role_policy = data.aws_iam_policy_document.eks_cluster_assume_role.json
+
+  tags = {
+    Name        = "${var.name}-eks-cluster-role-${var.environment}"
+    Environment = var.environment
+  }
 }
 
-# ---------------------------------------------------------
-# Full ECR Access for IAM
-# ---------------------------------------------------------
+resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
+  role = aws_iam_role.eks_cluster.name
 
-resource "aws_iam_role_policy_attachment" "othm_ecr" {
-  role       = aws_iam_role.othm_iam.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
-# ---------------------------------------------------------
-# EC2 Instance Access for IAM
-# ---------------------------------------------------------
+# =========================================================
+# EKS NODE ROLE
+# =========================================================
 
-resource "aws_iam_instance_profile" "othm_iam_ssm" {
-  name = "${var.name}-ssm-profile-${var.environment}"
-  role = aws_iam_role.othm_iam.name
+data "aws_iam_policy_document" "eks_node_assume_role" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+
+    actions = [
+      "sts:AssumeRole"
+    ]
+  }
+}
+
+resource "aws_iam_role" "eks_node" {
+  name = "${var.name}-eks-node-role-${var.environment}"
+
+  assume_role_policy = data.aws_iam_policy_document.eks_node_assume_role.json
+
+  tags = {
+    Name        = "${var.name}-eks-node-role-${var.environment}"
+    Environment = var.environment
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "eks_node_worker" {
+  role = aws_iam_role.eks_node.name
+
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "eks_node_cni" {
+  role = aws_iam_role.eks_node.name
+
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+}
+
+resource "aws_iam_role_policy_attachment" "eks_node_ecr" {
+  role = aws_iam_role.eks_node.name
+
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }

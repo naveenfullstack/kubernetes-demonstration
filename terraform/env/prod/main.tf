@@ -15,7 +15,7 @@ provider "aws" {
 }
 
 # ---------------------------------------------------------
-# Internet Gateway
+# Modules
 # ---------------------------------------------------------
 
 resource "aws_internet_gateway" "igw" {
@@ -32,17 +32,7 @@ module "vpc" {
 
   name        = var.name
   environment = var.environment
-  public_route_table = module.route-tables.public_route_table_id
-  private_route_table = module.route-tables.private_route_table_id
-}
-
-module "route-tables" {
-  source = "../../modules/route-tables"
-
-  environment = var.environment
-  vpc_id = module.vpc.vpc_id
   gateway_id = aws_internet_gateway.igw.id
-  name        = var.name
 }
 
 module "iam" {
@@ -52,21 +42,32 @@ module "iam" {
   environment = var.environment
 }
 
-module "sg" {
-  source = "../../modules/sg"
-
-  name        = var.name
-  environment = var.environment
-  vpc_id = module.vpc.vpc_id
-}
-
 module "ec2" {
   source = "../../modules/ec2"
 
   name        = var.name
   environment = var.environment
-  instance_type = var.instance_type
-  subnet_id = module.vpc.public_subnet_1_a_id
-  jenkins_sg = module.sg.jenkins_security_group
-  iam_ssm_profile = module.iam.iam_ssm_profile_name
+  vpc_id = module.vpc.vpc_id
+  public_subnet_1_a = module.vpc.public_subnet_1_a_id
+  public_subnet_1_b = module.vpc.public_subnet_1_b_id
+  enable_deletion_protection = var.enable_deletion_protection
+}
+
+module "eks" {
+  source = "../../modules/eks"
+
+  name        = var.name
+  environment = var.environment
+  vpc_id = module.vpc.vpc_id
+  private_subnet_1_a = module.vpc.private_subnet_1_a_id
+  private_subnet_1_b = module.vpc.private_subnet_1_b_id
+  eks_cluster_role_arn = module.iam.eks_cluster_role_arn
+  eks_node_role_arn = module.iam.eks_node_role_arn
+  eks_cluster_role_name = module.iam.eks_cluster_role_name
+  eks_node_role_name = module.iam.eks_node_role_name
+  node_instance_types = var.node_instance_types
+  node_min_size = var.node_min_size
+  node_desired_size = var.node_desired_size
+  node_max_size = var.node_max_size
+  aws_profile_id = var.aws_profile_id
 }

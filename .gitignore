@@ -2,3 +2,7 @@
 /terraform/env/prod/.terraform.lock.hcl
 /terraform/env/prod/.terraform
 /next/node_modules
+
+/terraform/env/jenkins/.terraform
+/terraform/env/jenkins/s.terraform
+/terraform/env/jenkins/.terraform.lock.hcl

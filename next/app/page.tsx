@@ -28,7 +28,8 @@ export default function Home() {
             </div>
             <p className="text-center text-sm">CloudFront</p>
 
-            <div className="w-[100px] bg-black h-[1px] absolute left-[100px] top-[50px]"></div>
+            <div className="w-[100px] bg-black h-[1px] absolute left-[100px] top-[50px]">
+            </div>
 
             <div className="space-y-2 border w-fit mx-auto p-2 rounded-md border-gray-300 absolute left-[220px] top-0">
               <div className="flex justify-center">
@@ -78,8 +79,10 @@ export default function Home() {
 
           <div className="flex justify-center">
             <div className="w-[50%] bg-black h-[1px] relative">
-              <div className="w-[1px] bg-black h-[40px] absolute top-0 left-0 z-99"></div>
-              <div className="w-[1px] bg-black h-[40px] absolute top-0 right-0 z-99"></div>
+              <div className="w-[1px] bg-black h-[40px] absolute top-0 left-0 z-99">
+              </div>
+              <div className="w-[1px] bg-black h-[40px] absolute top-0 right-0 z-99">
+              </div>
             </div>
           </div>
 
@@ -94,7 +97,7 @@ export default function Home() {
                   <img src="images/subnet.png" alt="Subnet" className="w-8 h-8 object-cover" />
                   <div>
                     <p className="text-sm">Public Subnet 1</p>
-                    <p className="text-xs">10.0.0.0/24</p>
+                    <p className="text-xs">10.0.1.0/24</p>
                   </div>
                 </div>
 
@@ -111,8 +114,6 @@ export default function Home() {
 
               <div className="flex justify-center">
                 <div className="w-[1px] bg-black h-[100px]">
-                  {/* dot */}
-                  <div className="bg-red-500 w-3 h-3 rounded-full -ml-1.5 mt-1.5 duration-300"></div>
                 </div>
               </div>
 
@@ -121,7 +122,7 @@ export default function Home() {
                   <img src="images/subnet.png" alt="Subnet" className="w-8 h-8 object-cover" />
                   <div>
                     <p className="text-sm">Private Subnet 1</p>
-                    <p className="text-xs">10.0.0.0/24</p>
+                    <p className="text-xs">10.0.3.0/24</p>
                   </div>
                 </div>
 
@@ -188,9 +189,15 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="border rounded min-h-[100px] flex justify-center items-center p-4 gap-8 mt-8">
+            <div className="border rounded min-h-[100px] flex justify-center items-center p-4 gap-8 mt-8 pt-0 relative">
 
               <section>
+
+                <div className="flex justify-center">
+                  <div className="w-[1px] bg-black h-[70px]">
+                  </div>
+                </div>
+
                 <div className="space-y-2 border w-fit mx-auto p-2 px-4 rounded-md border-gray-300">
                   <div className="flex justify-center">
                     <img src="images/dynamodb.jpeg" alt="dynamo" className="w-14" />
@@ -200,6 +207,12 @@ export default function Home() {
               </section>
 
               <section>
+
+                <div className="flex justify-center">
+                  <div className="w-[1px] bg-black h-[70px]">
+                  </div>
+                </div>
+
                 <div className="space-y-2 border w-fit mx-auto p-2 px-4 rounded-md border-gray-300">
                   <div className="flex justify-center">
                     <img src="images/s3.webp" alt="s3" className="w-14" />
@@ -209,6 +222,12 @@ export default function Home() {
               </section>
 
               <section>
+
+                <div className="flex justify-center">
+                  <div className="w-[1px] bg-black h-[70px]">
+                  </div>
+                </div>
+
                 <div className="space-y-2 border w-fit mx-auto p-2 px-4 rounded-md border-gray-300">
                   <div className="flex justify-center">
                     <img src="images/backups.jpeg" alt="backups" className="w-14" />

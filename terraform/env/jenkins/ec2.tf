@@ -17,35 +17,23 @@ data "aws_ami" "ubuntu" {
 }
 
 # ---------------------------------------------------------
-# Elastic IP
-# ---------------------------------------------------------
-
-resource "aws_eip" "othm_jenkings_ip" {
-  domain = "vpc"
-
-  tags = {
-    Name = "${var.environment}-jenkins-eip"
-  }
-}
-
-# ---------------------------------------------------------
 # EC2 Instance
 # ---------------------------------------------------------
 
-resource "aws_instance" "othm_jenkings_ec2" {
+resource "aws_instance" "jenkins_ec2" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
 
-  subnet_id = var.subnet_id
+  subnet_id = aws_subnet.jenkins_public_subnet_1_a.id
 
   vpc_security_group_ids = [
-    var.jenkins_sg
+    aws_security_group.jenkings_sg.id
   ]
 
   # The Elastic IP will be attached separately.
   associate_public_ip_address = true
 
-  iam_instance_profile = var.iam_ssm_profile
+  iam_instance_profile = aws_iam_instance_profile.jenkins_iam_ssm.name
 
   root_block_device { 
     volume_size = 30 
@@ -55,7 +43,7 @@ resource "aws_instance" "othm_jenkings_ec2" {
   }
 
   tags = {
-    Name = "${var.name}-jenkings-${var.environment}"
+    Name = "${var.name}-ec2-${var.environment}"
   }
 }
 
@@ -63,7 +51,7 @@ resource "aws_instance" "othm_jenkings_ec2" {
 # Elastic IP Association
 # ---------------------------------------------------------
 
-resource "aws_eip_association" "othm_jenkings_ip" {
-  instance_id   = aws_instance.othm_jenkings_ec2.id
-  allocation_id = aws_eip.othm_jenkings_ip.id
+resource "aws_eip_association" "jenkins_eip" {
+  instance_id   = aws_instance.jenkins_ec2.id
+  allocation_id = aws_eip.jenkins_eip.id
 }

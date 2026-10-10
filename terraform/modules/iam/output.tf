@@ -1,7 +1,15 @@
-output iam_role_name {
-  value       = aws_iam_role.othm_iam.name
+output "eks_cluster_role_arn" {
+  value = aws_iam_role.eks_cluster.arn
 }
 
-output "iam_ssm_profile_name" {
-  value = aws_iam_instance_profile.othm_iam_ssm.name
+output "eks_cluster_role_name" {
+  value = aws_iam_role.eks_cluster.name
+}
+
+output "eks_node_role_arn" {
+  value = aws_iam_role.eks_node.arn
+}
+
+output "eks_node_role_name" {
+  value = aws_iam_role.eks_node.name
 }
