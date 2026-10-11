@@ -60,3 +60,19 @@ resource "aws_route" "private_route_b" {
   destination_cidr_block = "0.0.0.0/0"
   nat_gateway_id         = aws_nat_gateway.nat_b.id
 }
+
+# EKS VPC Peering Route to Jenkins VPC AZ-a
+
+resource "aws_route" "eks_to_jenkins_az_a" {
+  route_table_id            = aws_route_table.private_route_table.id
+  destination_cidr_block    = "10.1.0.0/16"
+  vpc_peering_connection_id = var.vpc_peering_connection_id 
+}
+
+# EKS VPC Peering Route to Jenkins VPC AZ-b
+
+resource "aws_route" "eks_to_jenkins_az_b" {
+  route_table_id            = aws_route_table.private_route_table_b.id
+  destination_cidr_block    = "10.1.0.0/16"
+  vpc_peering_connection_id = var.vpc_peering_connection_id 
+}

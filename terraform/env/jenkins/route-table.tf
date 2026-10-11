@@ -24,3 +24,11 @@ resource "aws_main_route_table_association" "main" {
   vpc_id         = aws_vpc.jenkins_vpc.id
   route_table_id = aws_route_table.jenkins_public_route_table.id
 }
+
+# Add a route for the EKS VPC
+
+resource "aws_route" "jenkins_to_eks" {
+  route_table_id            = aws_route_table.jenkins_public_route_table.id
+  destination_cidr_block    = "10.0.0.0/16"
+  vpc_peering_connection_id = aws_vpc_peering_connection.jenkins_eks.id
+}

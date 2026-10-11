@@ -18,6 +18,14 @@ resource "aws_security_group" "eks" {
     self = true
   }
 
+  ingress {
+    description = "Allow Jenkins subnet to access the EKS API"
+    cidr_blocks = ["10.1.1.0/24"]
+    protocol    = "tcp"
+    from_port   = 443
+    to_port     = 443
+  }
+
   # Allow outbound traffic for AWS APIs
 
   egress {

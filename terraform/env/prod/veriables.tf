@@ -43,6 +43,14 @@ variable "enable_deletion_protection" {
   type        = bool
 }
 
+variable "eks_iam_user_name" {
+  type        = string
+}
+
+variable "vpc_peering_connection_id" {
+  type        = string
+}
+
 
 
 

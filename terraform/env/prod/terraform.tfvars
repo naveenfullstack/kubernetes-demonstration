@@ -19,3 +19,7 @@ node_max_size = 6
 aws_profile_id = "125022369875"
 
 enable_deletion_protection = false
+
+eks_iam_user_name = "othm-iam-eks-admin-prod"
+
+vpc_peering_connection_id = "pcx-0703d02927c4c6ac7"

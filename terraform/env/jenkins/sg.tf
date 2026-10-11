@@ -6,20 +6,14 @@ resource "aws_security_group" "jenkings_sg" {
   name        = "${var.name}-sg-${var.environment}"
   description = "Security group for jenkings ec2"
   vpc_id      = aws_vpc.jenkins_vpc.id
+
+  # Intbound
+
   # HTTP
   ingress {
     description = "Allow HTTP"
     from_port   = 80
     to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Jenkins
-  ingress {
-    description = "Jenkins"
-    from_port   = 8080
-    to_port     = 8080
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }

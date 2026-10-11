@@ -33,6 +33,7 @@ module "vpc" {
   name        = var.name
   environment = var.environment
   gateway_id = aws_internet_gateway.igw.id
+  vpc_peering_connection_id = var.vpc_peering_connection_id
 }
 
 module "iam" {
@@ -40,6 +41,9 @@ module "iam" {
 
   name        = var.name
   environment = var.environment
+  cluster_name = module.eks.cluster_name
+  eks_iam_user_name = var.eks_iam_user_name
+  aws_profile_id = var.aws_profile_id
 }
 
 module "ec2" {
