@@ -158,7 +158,7 @@ pipeline {
         }
 
         // =================================================
-        // 7. INSTALL / UPGRADE AWS LOAD BALANCER CONTROLLER
+        // 8. INSTALL / UPGRADE AWS LOAD BALANCER CONTROLLER
         // =================================================
         stage('Install AWS Load Balancer Controller') {
             steps {
@@ -207,7 +207,7 @@ pipeline {
         }
 
         // =================================================
-        // 9. APPLY POD MANAGEMENT RESOURCES
+        // 8. APPLY TARGET GROUP BINDING
         // =================================================
         stage('Apply Pod Management') {
             steps {
@@ -215,34 +215,73 @@ pipeline {
                     sh '''
                         set -eu
 
-                        # Verify the manifest exists
+                        echo "Checking required manifest..."
+
                         test -f k8-pods-mg.yml
 
-                        # Apply pod-management resources
-                        kubectl apply -f k8-pods-mg.yml
+                        : "${TARGET_GROUP_ARN:?TARGET_GROUP_ARN is required}"
 
-                        # Verify application deployment
+                        echo "Checking target group in AWS..."
+
+                        aws elbv2 describe-target-groups \
+                            --target-group-arns "${TARGET_GROUP_ARN}" \
+                            --region "${AWS_REGION}" \
+                            --query 'TargetGroups[0].{ARN:TargetGroupArn,TargetType:TargetType,Port:Port,VpcId:VpcId,Protocol:Protocol}' \
+                            --output table
+
+                        echo "Checking controller..."
+
+                        kubectl rollout status \
+                            deployment/aws-load-balancer-controller \
+                            -n kube-system \
+                            --timeout=300s
+
+                        echo "Checking application deployment..."
+
                         kubectl rollout status \
                             deployment/nextjs-website \
                             --timeout=300s
 
-                        # Show application pods
+                        echo "Generating TargetGroupBinding manifest..."
+
+                        envsubst '${TARGET_GROUP_ARN}' \
+                            < k8-pods-mg.yml \
+                            > /tmp/nextjs-tgb.yml
+
+                        echo "Validating generated manifest..."
+
+                        grep 'targetGroupARN:' /tmp/nextjs-tgb.yml
+
+                        echo "Testing webhook and manifest validation..."
+
+                        kubectl apply \
+                            --dry-run=server \
+                            -f /tmp/nextjs-tgb.yml
+
+                        echo "Applying TargetGroupBinding..."
+
+                        kubectl apply -f /tmp/nextjs-tgb.yml
+
+                        echo "Waiting for Kubernetes resources..."
+
+                        kubectl get deployment nextjs-website
+
                         kubectl get pods \
                             -l app=nextjs-website \
                             -o wide
 
-                        # Show services
-                        kubectl get services
+                        kubectl get service nextjs-website-service
 
-                        # Show TargetGroupBindings across namespaces
-                        kubectl get targetgroupbindings -A
+                        echo "Checking TargetGroupBinding..."
 
-                        # Verify the expected TargetGroupBinding
+                        kubectl get targetgroupbindings -n default
+
                         kubectl describe targetgroupbinding \
-                            html-test-tgb \
-                            -n "${POD_MGMT_NAMESPACE}"
+                            nextjs-website-tgb \
+                            -n default
 
-                        # Inspect AWS Load Balancer Controller logs
+                        echo "Checking controller logs..."
+
                         kubectl logs \
                             deployment/aws-load-balancer-controller \
                             -n kube-system \
