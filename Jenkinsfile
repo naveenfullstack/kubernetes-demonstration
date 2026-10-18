@@ -24,6 +24,8 @@ pipeline {
         EKS_VPC_ID = 'vpc-0e4ff9b74b9e7f013'
 
         POD_MGMT_NAMESPACE = 'default'
+
+        TARGET_GROUP_ARN  = 'arn:aws:elasticloadbalancing:us-east-1:125022369875:targetgroup/othm-eks-tg-prod/5d984f9da6c4747a'
     }
 
     stages {

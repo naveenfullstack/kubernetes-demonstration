@@ -7,5 +7,5 @@ spec:
   serviceRef:
     name: nextjs-website-service
     port: 3000
-  targetGroupARN: ${LB_CONTROLLER_ROLE_ARN}
+  targetGroupARN: ${TARGET_GROUP_ARN}
   targetType: ip
