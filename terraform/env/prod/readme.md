@@ -188,13 +188,13 @@ kubectl apply -f html-test.yaml
   apiVersion: elbv2.k8s.aws/v1beta1
   kind: TargetGroupBinding
   metadata:
-    name: html-test-tgb
+    name: nextjs-website-tgb
     namespace: default
   spec:
     serviceRef:
       name: html-test-service
       port: 80
-    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:125022369875:targetgroup/othm-eks-tg-prod/349196e6ba5965ff
+    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:125022369875:targetgroup/othm-eks-tg-prod/5d984f9da6c4747a
     targetType: ip
 EOF
  ```

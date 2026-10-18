@@ -207,7 +207,7 @@ pipeline {
         }
 
         // =================================================
-        // 8. APPLY TARGET GROUP BINDING
+        // 8. APPLY POD MANAGEMENT RESOURCES
         // =================================================
         stage('Apply Pod Management') {
             steps {
@@ -215,73 +215,34 @@ pipeline {
                     sh '''
                         set -eu
 
-                        echo "Checking required manifest..."
-
+                        # Verify the manifest exists
                         test -f k8-pods-mg.yml
 
-                        : "${TARGET_GROUP_ARN:?TARGET_GROUP_ARN is required}"
+                        # Apply pod-management resources
+                        kubectl apply -f k8-pods-mg.yml
 
-                        echo "Checking target group in AWS..."
-
-                        aws elbv2 describe-target-groups \
-                            --target-group-arns "${TARGET_GROUP_ARN}" \
-                            --region "${AWS_REGION}" \
-                            --query 'TargetGroups[0].{ARN:TargetGroupArn,TargetType:TargetType,Port:Port,VpcId:VpcId,Protocol:Protocol}' \
-                            --output table
-
-                        echo "Checking controller..."
-
-                        kubectl rollout status \
-                            deployment/aws-load-balancer-controller \
-                            -n kube-system \
-                            --timeout=300s
-
-                        echo "Checking application deployment..."
-
+                        # Verify application deployment
                         kubectl rollout status \
                             deployment/nextjs-website \
                             --timeout=300s
 
-                        echo "Generating TargetGroupBinding manifest..."
-
-                        envsubst '${TARGET_GROUP_ARN}' \
-                            < k8-pods-mg.yml \
-                            > /tmp/nextjs-tgb.yml
-
-                        echo "Validating generated manifest..."
-
-                        grep 'targetGroupARN:' /tmp/nextjs-tgb.yml
-
-                        echo "Testing webhook and manifest validation..."
-
-                        kubectl apply \
-                            --dry-run=server \
-                            -f /tmp/nextjs-tgb.yml
-
-                        echo "Applying TargetGroupBinding..."
-
-                        kubectl apply -f /tmp/nextjs-tgb.yml
-
-                        echo "Waiting for Kubernetes resources..."
-
-                        kubectl get deployment nextjs-website
-
+                        # Show application pods
                         kubectl get pods \
                             -l app=nextjs-website \
                             -o wide
 
-                        kubectl get service nextjs-website-service
+                        # Show services
+                        kubectl get services
 
-                        echo "Checking TargetGroupBinding..."
+                        # Show TargetGroupBindings across namespaces
+                        kubectl get targetgroupbindings -A
 
-                        kubectl get targetgroupbindings -n default
-
+                        # Verify the expected TargetGroupBinding
                         kubectl describe targetgroupbinding \
-                            nextjs-website-tgb \
-                            -n default
+                            html-test-tgb \
+                            -n "${POD_MGMT_NAMESPACE}"
 
-                        echo "Checking controller logs..."
-
+                        # Inspect AWS Load Balancer Controller logs
                         kubectl logs \
                             deployment/aws-load-balancer-controller \
                             -n kube-system \

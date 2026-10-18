@@ -6,6 +6,6 @@ metadata:
 spec:
   serviceRef:
     name: nextjs-website-service
-    port: 3000
+    port: 80
   targetGroupARN: ${TARGET_GROUP_ARN}
   targetType: ip
