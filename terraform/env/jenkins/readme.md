@@ -25,30 +25,36 @@ server {
 
     server_name jenkins.akesha.site;
 
-    access_log /var/log/nginx/jenkins.access.log;
-    error_log  /var/log/nginx/jenkins.error.log;
-
     location / {
         proxy_pass http://127.0.0.1:8080;
 
         proxy_http_version 1.1;
 
-        proxy_set_header Host              $http_host;
-        proxy_set_header X-Real-IP         $remote_addr;
-        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
 
-        proxy_set_header Upgrade    $http_upgrade;
-        proxy_set_header Connection $connection_upgrade;
+        # Jenkins WebSocket and connection upgrade support
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
 
-        proxy_connect_timeout 90;
-        proxy_send_timeout    90;
-        proxy_read_timeout    90;
+        proxy_read_timeout 90s;
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 90s;
+    }
 
-        proxy_request_buffering off;
-        proxy_buffering off;
+    location /github-webhook/ {
+        proxy_pass http://127.0.0.1:8080/github-webhook/;
 
-        client_max_body_size 20m;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_read_timeout 90s;
     }
 }
 ```

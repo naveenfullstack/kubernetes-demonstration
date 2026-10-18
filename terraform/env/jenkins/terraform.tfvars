@@ -8,8 +8,8 @@ name = "othm"
 
 aws_profile = "fitwin-dev"
 
-eks_vpc_id = "vpc-02c88c1718a248cd1"
+eks_vpc_id = "vpc-0e4ff9b74b9e7f013"
 
-eks_public_subnet_1a = "subnet-0e22e41957bbd97b3"
+eks_public_subnet_1a = "subnet-05e9fc8749647f73d"
 
-eks_public_subnet_1b = "subnet-02ea0eba582d2e31d"
+eks_public_subnet_1b = "subnet-00b1613feef01b765"
