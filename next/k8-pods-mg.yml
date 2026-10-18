@@ -1,0 +1,11 @@
+apiVersion: elbv2.k8s.aws/v1beta1
+kind: TargetGroupBinding
+metadata:
+  name: nextjs-website-tgb
+  namespace: default
+spec:
+  serviceRef:
+    name: nextjs-website-service
+    port: 3000
+  targetGroupARN: ${ALB_ARN}
+  targetType: ip

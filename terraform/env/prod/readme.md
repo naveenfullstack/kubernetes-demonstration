@@ -162,18 +162,24 @@ kubectl apply -f html-test.yaml
   ./get_helm.sh
  ```
 
+ ## Add the AWS EKS Helm repository
+ ```bash
+ helm repo add eks https://aws.github.io/eks-charts
+
+ helm repo update
+```
+
  ## Create Service Account
 
  ```bash
  helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   -n kube-system \
-  --set clusterName=othm-eks-prod \
+  --set clusterName=<EKS_CUSTER_NAME> \
   --set region=us-east-1 \
-  --set vpcId=vpc-0d57b27ee9b6a7972 \
+  --set vpcId=<VPC_ID> \
   --set serviceAccount.create=true \
   --set serviceAccount.name=aws-load-balancer-controller \
-  --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=<LB_CONTROLLER_ROLE_ARN>
- ```
+  --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=<LB_CONTROLER_ARN>
 
  ## Create the binding config on EKS management server
 
