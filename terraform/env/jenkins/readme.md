@@ -117,3 +117,9 @@ rm kubectl
 
 kubectl version --client
 ```
+
+## Give jenkins docker permisions
+
+```bash
+sudo usermod -aG docker jenkins
+```

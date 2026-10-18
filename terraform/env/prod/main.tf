@@ -33,7 +33,6 @@ module "vpc" {
   name        = var.name
   environment = var.environment
   gateway_id = aws_internet_gateway.igw.id
-  vpc_peering_connection_id = var.vpc_peering_connection_id
 }
 
 module "iam" {
@@ -42,8 +41,8 @@ module "iam" {
   name        = var.name
   environment = var.environment
   cluster_name = module.eks.cluster_name
-  eks_iam_user_name = var.eks_iam_user_name
   aws_profile_id = var.aws_profile_id
+  oidc_issuer_url = module.eks.oidc_issuer_url
 }
 
 module "ec2" {
@@ -74,4 +73,7 @@ module "eks" {
   node_desired_size = var.node_desired_size
   node_max_size = var.node_max_size
   aws_profile_id = var.aws_profile_id
+  jenkins_security_group_id = var.jenkins_security_group_id
+  eks_security_group_id = var.eks_security_group_id
+  alb_security_group_id = module.ec2.security_group
 }

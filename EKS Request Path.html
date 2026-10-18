@@ -1,0 +1,316 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>EKS Request Path</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<style>
+  /* Layout concept: one wide left-to-right flow diagram (edge, load balancing, two AZ lanes), controls above it, the request path written out below. */
+  :root {
+    --bg: #f2f4f7;
+    --panel: #e7ebf0;
+    --surface: #ffffff;
+    --fg: #0e1a2b;
+    --muted: #566579;
+    --line: #c5cfdb;
+    --req: #d9620b;
+    --res: #0b8a96;
+    --az-a: #0b8a96;
+    --az-b: #5b4fc7;
+    --bad: #c62f3b;
+    --good: #1f8a4c;
+    --font-display: 'Bricolage Grotesque', 'Instrument Sans', system-ui, sans-serif;
+    --font-body: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #09101c; --panel: #0d1626; --surface: #111b2c; --fg: #e7edf6; --muted: #93a3b9;
+      --line: #27364d; --req: #ff9a3d; --res: #3cc7d3; --az-a: #3cc7d3; --az-b: #a095ff;
+      --bad: #ff6b76; --good: #4fcf86; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #09101c; --panel: #0d1626; --surface: #111b2c; --fg: #e7edf6; --muted: #93a3b9;
+    --line: #27364d; --req: #ff9a3d; --res: #3cc7d3; --az-a: #3cc7d3; --az-b: #a095ff;
+    --bad: #ff6b76; --good: #4fcf86; color-scheme: dark;
+  }
+  body {
+    background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px;
+    padding-block: 28px 40px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  h1, h2 { font-family: var(--font-display); text-wrap: balance; }
+  .mono { font-family: var(--font-mono); }
+  .card { background: var(--surface); border: 1px solid var(--line); }
+  .btn {
+    background: var(--surface); color: var(--fg); border: 1px solid var(--line);
+    font-weight: 500; font-size: 14px; padding: 8px 14px; border-radius: 6px; cursor: pointer;
+  }
+  .btn:hover { border-color: var(--muted); }
+  .btn:focus-visible { outline: 2px solid var(--req); outline-offset: 2px; }
+  .btn[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+
+  /* diagram */
+  .diagram { overflow-x: auto; }
+  .diagram svg { display: block; min-width: 880px; width: 100%; height: auto; }
+  .bx { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+  .vpc { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 3 5; }
+  .edge { fill: none; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 3 5; }
+  .az-a-box { fill: var(--surface); stroke: var(--az-a); stroke-width: 1.5; stroke-dasharray: 7 5; }
+  .az-b-box { fill: var(--surface); stroke: var(--az-b); stroke-width: 1.5; stroke-dasharray: 7 5; }
+  .node { fill: var(--panel); stroke: var(--line); stroke-width: 1.2; }
+  .pod { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+  .pod-a { stroke: var(--az-a); }
+  .pod-b { stroke: var(--az-b); }
+  .t { fill: var(--fg); font: 600 14px var(--font-body); }
+  .t-sm { fill: var(--fg); font: 600 12px var(--font-body); }
+  .s { fill: var(--muted); font: 400 11px var(--font-mono); }
+  .s-az-a { fill: var(--az-a); font: 500 11.5px var(--font-mono); letter-spacing: .04em; }
+  .s-az-b { fill: var(--az-b); font: 500 11.5px var(--font-mono); letter-spacing: .04em; }
+  .ico { fill: none; stroke: var(--fg); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .wire { fill: none; stroke: var(--line); stroke-width: 2; }
+  .flow { fill: none; stroke: var(--req); stroke-width: 2; stroke-dasharray: 5 9; opacity: .75; animation: dash 1.1s linear infinite; }
+  @keyframes dash { to { stroke-dashoffset: -28; } }
+  .dot { fill: var(--good); }
+  .req { fill: var(--req); }
+  .res { fill: var(--res); }
+  .b-down .flow-b { display: none; }
+  .b-down .pod-b { stroke: var(--bad); stroke-dasharray: 4 4; }
+  .b-down .dot-b { fill: var(--bad); }
+  .b-down .az-b-box { stroke: var(--bad); }
+  .b-down .s-az-b { fill: var(--bad); }
+  .paused .flow { animation-play-state: paused; }
+  @media (prefers-reduced-motion: reduce) { .flow { animation: none; } }
+</style>
+
+<main class="mx-auto w-full" style="max-width: 1120px;">
+  <header class="flex flex-col gap-2 pb-6">
+    <p class="mono text-xs uppercase" style="color: var(--muted); letter-spacing: .12em;">Amazon EKS · Application Load Balancer · two AZs</p>
+    <h1 class="text-3xl sm:text-4xl font-bold leading-tight">Request path from CloudFront to pods</h1>
+    <p class="max-w-2xl" style="color: var(--muted); line-height: 1.55;">Each orange packet is a viewer request. Teal packets are the responses coming back along the same route. Take AZ-b offline to see how the target group keeps serving from AZ-a.</p>
+  </header>
+
+  <section class="flex flex-wrap items-center gap-3 pb-4" aria-label="Controls">
+    <button id="toggle-motion" class="btn" type="button" aria-pressed="false">Pause traffic</button>
+    <button id="toggle-az" class="btn" type="button" aria-pressed="false">Simulate AZ-b outage</button>
+    <p class="mono text-xs sm:ml-auto" style="color: var(--muted);" aria-live="polite">tg-web healthy targets: <span id="healthy" style="color: var(--fg); font-weight: 500;">6 / 6</span></p>
+  </section>
+
+  <section class="card rounded-md diagram" aria-label="Architecture diagram">
+    <svg id="arch" viewBox="0 0 1200 640" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="arch-title arch-desc">
+      <title id="arch-title">CloudFront to EKS request path</title>
+      <desc id="arch-desc">Viewers reach CloudFront, which forwards to an Application Load Balancer. The load balancer sends traffic to a target group, which spreads it across three pods in availability zone A and three pods in availability zone B.</desc>
+
+      <!-- VPC -->
+      <rect class="vpc" x="360" y="30" width="830" height="580" rx="10"/>
+      <text class="s" x="378" y="56">VPC 10.0.0.0/16</text>
+      <text class="s" x="1172" y="56" text-anchor="end">EKS cluster prod-web</text>
+
+      <!-- AZ panels -->
+      <rect class="az-a-box" x="740" y="70" width="430" height="240" rx="8"/>
+      <text class="s-az-a" x="758" y="92">AZ-a · private subnet 10.0.1.0/24</text>
+      <rect class="az-b-box" x="740" y="330" width="430" height="240" rx="8"/>
+      <text class="s-az-b" x="758" y="352">AZ-b · private subnet 10.0.2.0/24</text>
+
+      <!-- Nodes -->
+      <rect class="node" x="758" y="106" width="394" height="188" rx="6"/>
+      <text class="t-sm" x="772" y="128">Managed node</text>
+      <text class="s" x="1138" y="128" text-anchor="end">m6i.large</text>
+      <rect class="node" x="758" y="366" width="394" height="188" rx="6"/>
+      <text class="t-sm" x="772" y="388">Managed node</text>
+      <text class="s" x="1138" y="388" text-anchor="end">m6i.large</text>
+
+      <!-- Wires -->
+      <g>
+        <path class="wire" d="M110 320 H170"/>
+        <path class="wire" d="M320 320 H390"/>
+        <path class="wire" d="M520 320 H570"/>
+        <path class="wire" d="M690 320 H725"/>
+        <path class="wire" d="M725 165 V425"/>
+        <path class="wire" d="M725 165 H1077 M833 165 V185 M955 165 V185 M1077 165 V185"/>
+        <path class="wire" d="M725 425 H1077 M833 425 V445 M955 425 V445 M1077 425 V445"/>
+      </g>
+      <g class="flow-a">
+        <path class="flow" d="M110 320 H725 V165 H1077 M833 165 V185 M955 165 V185 M1077 165 V185"/>
+      </g>
+      <g class="flow-b">
+        <path class="flow" d="M725 320 V425 H1077 M833 425 V445 M955 425 V445 M1077 425 V445"/>
+      </g>
+
+      <!-- Viewers -->
+      <rect class="bx" x="20" y="280" width="90" height="80" rx="8"/>
+      <rect class="ico" x="46" y="296" width="38" height="26" rx="3"/>
+      <path class="ico" d="M40 332 H90"/>
+      <text class="t-sm" x="65" y="350" text-anchor="middle">Viewers</text>
+      <text class="s" x="65" y="268" text-anchor="middle">HTTPS</text>
+
+      <!-- CloudFront -->
+      <rect class="edge" x="150" y="220" width="190" height="200" rx="10"/>
+      <text class="s" x="245" y="208" text-anchor="middle">Edge location</text>
+      <rect class="bx" x="170" y="270" width="150" height="100" rx="8"/>
+      <circle class="ico" cx="195" cy="302" r="11"/>
+      <ellipse class="ico" cx="195" cy="302" rx="4.5" ry="11"/>
+      <path class="ico" d="M184 302 H206"/>
+      <text class="t" x="215" y="307">CloudFront</text>
+      <text class="s" x="182" y="334">TLS, cache, WAF</text>
+      <text class="s" x="182" y="352">origin: ALB :443</text>
+
+      <!-- ALB -->
+      <rect class="bx" x="390" y="270" width="130" height="100" rx="8"/>
+      <path class="ico" d="M404 302 H418 M418 302 L430 292 H442 M418 302 L430 312 H442 M436 288 L442 292 L436 296 M436 308 L442 312 L436 316"/>
+      <text class="t" x="454" y="297">ALB</text>
+      <text class="s" x="402" y="334">listener :443</text>
+      <text class="s" x="402" y="352">subnets a + b</text>
+      <text class="s" x="455" y="394" text-anchor="middle">public subnets</text>
+
+      <!-- Target group -->
+      <rect class="bx" x="570" y="260" width="120" height="120" rx="8"/>
+      <text class="t" x="582" y="286">Target group</text>
+      <text class="s" x="582" y="308">tg-web</text>
+      <text class="s" x="582" y="326">type: ip</text>
+      <text class="s" x="582" y="344">:8080 /healthz</text>
+      <circle class="dot" cx="588" cy="362" r="4"/>
+      <text class="s" x="598" y="366" id="tg-label">6 healthy</text>
+
+      <!-- Pods AZ-a -->
+      <g>
+        <rect class="pod pod-a" x="778" y="185" width="110" height="70" rx="6"/>
+        <circle class="dot" cx="792" cy="201" r="4"/>
+        <text class="t-sm" x="802" y="205">pod</text>
+        <text class="s" x="790" y="226">web-7c9d-4kq2x</text>
+        <text class="s" x="790" y="243">10.0.1.21:8080</text>
+        <rect class="pod pod-a" x="900" y="185" width="110" height="70" rx="6"/>
+        <circle class="dot" cx="914" cy="201" r="4"/>
+        <text class="t-sm" x="924" y="205">pod</text>
+        <text class="s" x="912" y="226">web-7c9d-9mfzt</text>
+        <text class="s" x="912" y="243">10.0.1.34:8080</text>
+        <rect class="pod pod-a" x="1022" y="185" width="110" height="70" rx="6"/>
+        <circle class="dot" cx="1036" cy="201" r="4"/>
+        <text class="t-sm" x="1046" y="205">pod</text>
+        <text class="s" x="1034" y="226">web-7c9d-jx8bw</text>
+        <text class="s" x="1034" y="243">10.0.1.57:8080</text>
+      </g>
+
+      <!-- Pods AZ-b -->
+      <g>
+        <rect class="pod pod-b" x="778" y="445" width="110" height="70" rx="6"/>
+        <circle class="dot dot-b" cx="792" cy="461" r="4"/>
+        <text class="t-sm" x="802" y="465">pod</text>
+        <text class="s" x="790" y="486">web-7c9d-2hpvn</text>
+        <text class="s" x="790" y="503">10.0.2.18:8080</text>
+        <rect class="pod pod-b" x="900" y="445" width="110" height="70" rx="6"/>
+        <circle class="dot dot-b" cx="914" cy="461" r="4"/>
+        <text class="t-sm" x="924" y="465">pod</text>
+        <text class="s" x="912" y="486">web-7c9d-r6c5d</text>
+        <text class="s" x="912" y="503">10.0.2.43:8080</text>
+        <rect class="pod pod-b" x="1022" y="445" width="110" height="70" rx="6"/>
+        <circle class="dot dot-b" cx="1036" cy="461" r="4"/>
+        <text class="t-sm" x="1046" y="465">pod</text>
+        <text class="s" x="1034" y="486">web-7c9d-wd7lq</text>
+        <text class="s" x="1034" y="503">10.0.2.62:8080</text>
+      </g>
+
+      <!-- Packet layers filled by script -->
+      <g id="packets"></g>
+    </svg>
+  </section>
+
+  <section class="flex flex-wrap gap-x-6 gap-y-2 pt-3 mono text-xs" style="color: var(--muted);" aria-label="Legend">
+    <span class="inline-flex items-center gap-2"><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="5" class="req"/></svg>Request</span>
+    <span class="inline-flex items-center gap-2"><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="5" class="res"/></svg>Response</span>
+    <span class="inline-flex items-center gap-2"><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="5" class="dot"/></svg>Healthy target</span>
+    <span class="inline-flex items-center gap-2"><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="5" style="fill: var(--bad)"/></svg>Unhealthy target</span>
+    <span class="sm:ml-auto">Names and IPs are example values.</span>
+  </section>
+</main>
+
+<script>
+(function () {
+  var NS = 'http://www.w3.org/2000/svg';
+  var svg = document.getElementById('arch');
+  var layer = document.getElementById('packets');
+  var podX = [833, 955, 1077];
+  var routes = [];
+  var i;
+
+  for (i = 0; i < 6; i++) {
+    var az = i < 3 ? 'a' : 'b';
+    var x = podX[i % 3];
+    var bus = az === 'a' ? 165 : 425;
+    var end = az === 'a' ? 185 : 445;
+    routes.push({ az: az, d: 'M110 320 H725 V' + bus + ' H' + x + ' V' + end });
+  }
+
+  function packet(cls, r, d, begin, reverse) {
+    var g = document.createElementNS(NS, 'g');
+    g.setAttribute('class', 'flow-' + r.az);
+    var c = document.createElementNS(NS, 'circle');
+    c.setAttribute('r', '5.5');
+    c.setAttribute('class', cls);
+    c.setAttribute('opacity', '0');
+    var m = document.createElementNS(NS, 'animateMotion');
+    m.setAttribute('path', r.d);
+    m.setAttribute('dur', d + 's');
+    m.setAttribute('begin', begin + 's');
+    m.setAttribute('repeatCount', 'indefinite');
+    m.setAttribute('calcMode', 'linear');
+    if (reverse) {
+      m.setAttribute('keyPoints', '1;0');
+      m.setAttribute('keyTimes', '0;1');
+    }
+    var o = document.createElementNS(NS, 'animate');
+    o.setAttribute('attributeName', 'opacity');
+    o.setAttribute('values', '0;1;1;0');
+    o.setAttribute('keyTimes', '0;0.04;0.94;1');
+    o.setAttribute('dur', d + 's');
+    o.setAttribute('begin', begin + 's');
+    o.setAttribute('repeatCount', 'indefinite');
+    c.appendChild(m);
+    c.appendChild(o);
+    g.appendChild(c);
+    layer.appendChild(g);
+  }
+
+  routes.forEach(function (r, idx) {
+    var dur = 4.8;
+    var start = idx * 0.8;
+    packet('req', r, dur, start, false);
+    packet('res', r, dur, start + dur / 2, true);
+  });
+
+  var motionBtn = document.getElementById('toggle-motion');
+  var azBtn = document.getElementById('toggle-az');
+  var healthy = document.getElementById('healthy');
+  var tgLabel = document.getElementById('tg-label');
+  var paused = false;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function setPaused(p) {
+    paused = p;
+    svg.classList.toggle('paused', p);
+    if (p) { svg.pauseAnimations(); } else { svg.unpauseAnimations(); }
+    motionBtn.setAttribute('aria-pressed', String(p));
+    motionBtn.textContent = p ? 'Resume traffic' : 'Pause traffic';
+  }
+
+  azBtn.addEventListener('click', function () {
+    var down = azBtn.getAttribute('aria-pressed') !== 'true';
+    azBtn.setAttribute('aria-pressed', String(down));
+    azBtn.textContent = down ? 'Restore AZ-b' : 'Simulate AZ-b outage';
+    svg.classList.toggle('b-down', down);
+    healthy.textContent = down ? '3 / 6' : '6 / 6';
+    tgLabel.textContent = down ? '3 healthy' : '6 healthy';
+  });
+
+  motionBtn.addEventListener('click', function () { setPaused(!paused); });
+
+  if (reduce) {
+    try { svg.setCurrentTime(2.4); } catch (e) {}
+    setPaused(true);
+  }
+})();
+</script>
+</body></html>

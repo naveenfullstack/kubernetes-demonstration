@@ -5,8 +5,7 @@
 resource "aws_security_group" "jenkings_sg" {
   name        = "${var.name}-sg-${var.environment}"
   description = "Security group for jenkings ec2"
-  vpc_id      = aws_vpc.jenkins_vpc.id
-
+  vpc_id      = var.eks_vpc_id
   # Intbound
 
   # HTTP

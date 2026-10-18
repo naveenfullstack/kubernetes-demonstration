@@ -117,34 +117,120 @@ resource "aws_eks_access_policy_association" "jenkins_cluster_admin" {
 # EC2 Network Troubleshooting Permissions for Jenkins
 # ---------------------------------------------------------
 
-# resource "aws_iam_role_policy" "jenkins_network_read" {
-#   name = "${var.name}-jenkins-network-read-${var.environment}"
-#   role = aws_iam_role.jenkins_iam.id
+resource "aws_iam_role_policy" "jenkins_network_read" {
+  name = "${var.name}-jenkins-network-read-${var.environment}"
+  role = aws_iam_role.jenkins_iam.id
 
-#   policy = jsonencode({
-#     Version = "2012-10-17"
+  policy = jsonencode({
+    Version = "2012-10-17"
 
-#     Statement = [
-#       {
-#         Sid    = "ReadVpcNetworking"
-#         Effect = "Allow"
+    Statement = [
+      {
+        Sid    = "ReadVpcNetworking"
+        Effect = "Allow"
 
-#         Action = [
-#           "ec2:DescribeVpcs",
-#           "ec2:DescribeVpcPeeringConnections",
-#           "ec2:DescribeRouteTables",
-#           "ec2:DescribeSubnets",
-#           "ec2:DescribeSecurityGroups",
-#           "ec2:DescribeNetworkAcls",
-#           "ec2:DescribeNetworkInterfaces",
-#           "eks:ListClusters",
-#           "eks:ListAccessEntries",
-#           "eks:ListAssociatedAccessPolicies",
-#           "eks:ListTagsForResource"
-#         ]
+        Action = [
+          # VPC networking
+          "ec2:DescribeVpcs",
+          "ec2:DescribeVpcPeeringConnections",
+          "ec2:DescribeRouteTables",
+          "ec2:DescribeSubnets",
+          "ec2:DescribeSecurityGroups",
+          "ec2:DescribeNetworkAcls",
+          "ec2:DescribeNetworkInterfaces",
+          "ec2:DescribeInstances",
 
-#         Resource = "*"
-#       }
-#     ]
-#   })
-# }
+          # EKS cluster and node group diagnostics
+          "eks:ListClusters",
+          "eks:DescribeCluster",
+          "eks:ListNodegroups",
+          "eks:DescribeNodegroup",
+          "eks:ListAccessEntries",
+          "eks:ListAssociatedAccessPolicies",
+          "eks:ListTagsForResource",
+          "eks:DescribeAccessEntry",
+          "eks:DescribeClusterVersions",
+          "eks:TagResource",
+
+          # Auto Scaling diagnostics
+          "autoscaling:DescribeAutoScalingGroups",
+          "autoscaling:DescribeScalingActivities",
+
+          #iam
+          "iam:ListAttachedRolePolicies",
+          "iam:ListRoles",
+
+          #load Balance
+          "loadbalancing:DescribeTargetGroups",
+          "elasticloadbalancing:DescribeTargetGroups",
+          "elasticloadbalancing:DescribeTargetHealth",
+          "elasticloadbalancing:DescribeLoadBalancers"
+        ]
+
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+# ---------------------------------------------------------
+# IAM Permissions for AWS Load Balancer Controller Setup
+# ---------------------------------------------------------
+
+resource "aws_iam_role_policy" "jenkins_lbc_setup" {
+  name = "${var.name}-jenkins-lbc-setup-${var.environment}"
+  role = aws_iam_role.jenkins_iam.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [
+      {
+        Sid    = "CreateLoadBalancerControllerPolicy"
+        Effect = "Allow"
+
+        Action = [
+          "iam:CreatePolicy",
+          "iam:GetPolicy",
+          "iam:GetPolicyVersion",
+          "iam:ListPolicyVersions",
+          "iam:ListPolicies"
+        ]
+
+        Resource = "*"
+      },
+      {
+        Sid    = "ManageLoadBalancerControllerRole"
+        Effect = "Allow"
+
+        Action = [
+          "iam:CreateRole",
+          "iam:GetRole",
+          "iam:UpdateAssumeRolePolicy",
+          "iam:TagRole",
+          "iam:AttachRolePolicy",
+          "iam:DetachRolePolicy",
+          "iam:ListAttachedRolePolicies",
+          "iam:CreatePolicyVersion",
+          "iam:DeletePolicyVersion",
+          "iam:PassRole"
+        ]
+
+        Resource = "*"
+      },
+      {
+        Sid    = "ManageOIDCProvider"
+        Effect = "Allow"
+
+        Action = [
+          "iam:CreateOpenIDConnectProvider",
+          "iam:GetOpenIDConnectProvider",
+          "iam:ListOpenIDConnectProviders",
+          "iam:TagOpenIDConnectProvider"
+        ]
+
+        Resource = "*"
+      }
+    ]
+  })
+}

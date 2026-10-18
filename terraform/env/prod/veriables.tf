@@ -42,15 +42,13 @@ variable "aws_profile_id" {
 variable "enable_deletion_protection" {
   type        = bool
 }
-
-variable "eks_iam_user_name" {
+variable jenkins_security_group_id {
   type        = string
 }
 
-variable "vpc_peering_connection_id" {
+variable eks_security_group_id {
   type        = string
 }
-
 
 
 

@@ -21,3 +21,11 @@ output "cluster_version" {
 output "node_group_name" {
   value = aws_eks_node_group.othm.node_group_name
 }
+
+# output "eks_main_sg" {
+#   value = aws_security_group.eks.id
+# }
+
+output "oidc_issuer_url" {
+  value = aws_eks_cluster.othm.identity[0].oidc[0].issuer
+}

@@ -58,3 +58,17 @@ variable "node_max_size" {
 variable "aws_profile_id" {
   type    = string
 }
+
+variable jenkins_security_group_id {
+  type        = string
+}
+
+variable eks_security_group_id {
+  type        = string
+}
+
+variable alb_security_group_id {
+  type        = string
+}
+
+

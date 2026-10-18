@@ -20,10 +20,6 @@ resource "aws_eks_cluster" "othm" {
       var.private_subnet_1_b
     ]
 
-    security_group_ids = [
-      aws_security_group.eks.id
-    ]
-
     endpoint_private_access = true
     endpoint_public_access  = false
   }
@@ -38,30 +34,30 @@ resource "aws_eks_cluster" "othm" {
 # EKS ADMIN ACCESS ENTRY
 # =========================================================
 
-resource "aws_eks_access_entry" "admin" {
-  cluster_name  = aws_eks_cluster.othm.name
-  principal_arn = "arn:aws:iam::${var.aws_profile_id}:user/terraform"
+# resource "aws_eks_access_entry" "admin" {
+#   cluster_name  = aws_eks_cluster.othm.name
+#   principal_arn = "arn:aws:iam::${var.aws_profile_id}:user/terraform"
 
-  type = "STANDARD"
+#   type = "STANDARD"
 
-  tags = {
-    Name        = "${var.name}-eks-admin-access-${var.environment}"
-    Environment = var.environment
-  }
-}
+#   tags = {
+#     Name        = "${var.name}-eks-admin-access-${var.environment}"
+#     Environment = var.environment
+#   }
+# }
 
 
 # =========================================================
 # EKS ADMIN ACCESS POLICY
 # =========================================================
 
-resource "aws_eks_access_policy_association" "admin" {
-  cluster_name  = aws_eks_cluster.othm.name
-  principal_arn = aws_eks_access_entry.admin.principal_arn
+# resource "aws_eks_access_policy_association" "admin" {
+#   cluster_name  = aws_eks_cluster.othm.name
+#   principal_arn = aws_eks_access_entry.admin.principal_arn
 
-  policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+#   policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
 
-  access_scope {
-    type = "cluster"
-  }
-}
+#   access_scope {
+#     type = "cluster"
+#   }
+# }

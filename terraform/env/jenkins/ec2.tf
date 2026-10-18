@@ -24,7 +24,7 @@ resource "aws_instance" "jenkins_ec2" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
 
-  subnet_id = aws_subnet.jenkins_public_subnet_1_a.id
+  subnet_id = var.eks_public_subnet_1a
 
   vpc_security_group_ids = [
     aws_security_group.jenkings_sg.id

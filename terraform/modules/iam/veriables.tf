@@ -10,10 +10,10 @@ variable cluster_name {
   type        = string
 }
 
-variable eks_iam_user_name {
+variable aws_profile_id {
   type        = string
 }
 
-variable aws_profile_id {
-  type        = string
+variable oidc_issuer_url {
+  type = string
 }

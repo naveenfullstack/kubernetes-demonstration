@@ -20,6 +20,6 @@ aws_profile_id = "125022369875"
 
 enable_deletion_protection = false
 
-eks_iam_user_name = "othm-iam-eks-admin-prod"
+jenkins_security_group_id = "sg-0b44a920ff7e078f8"
 
-vpc_peering_connection_id = "pcx-0703d02927c4c6ac7"
+eks_security_group_id = "sg-06b8c0e3127c2a49d"

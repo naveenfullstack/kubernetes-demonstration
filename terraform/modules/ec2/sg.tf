@@ -3,22 +3,6 @@ resource "aws_security_group" "alb" {
   description = "Security group for the EKS application load balancer"
   vpc_id      = var.vpc_id
 
-  ingress {
-    description = "Allow HTTPS traffic"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "Allow HTTP traffic for redirect"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   egress {
     description = "Allow outbound traffic to EKS workloads"
     from_port   = 0
@@ -32,3 +16,27 @@ resource "aws_security_group" "alb" {
     Environment = var.environment
   }
 }
+
+# HTTP
+
+resource "aws_vpc_security_group_ingress_rule" "alb_http" {
+  security_group_id = aws_security_group.alb.id
+
+  description = "Allow HTTP traffic to the ALB"
+  ip_protocol = "tcp"
+  from_port   = 80
+  to_port     = 80
+  cidr_ipv4   = "0.0.0.0/0"
+}
+
+# HTTPS
+
+# resource "aws_vpc_security_group_ingress_rule" "alb_https" {
+#   security_group_id = aws_security_group.alb.id
+
+#   description = "Allow HTTPS traffic to the ALB"
+#   ip_protocol = "tcp"
+#   from_port   = 443
+#   to_port     = 443
+#   cidr_ipv4   = "0.0.0.0/0"
+# }

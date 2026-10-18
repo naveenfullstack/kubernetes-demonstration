@@ -22,6 +22,15 @@ variable eks_vpc_id {
   type        = string
 }
 
+variable eks_public_subnet_1a {
+  type        = string
+}
+
+variable eks_public_subnet_1b {
+  type        = string
+}
+
+
 
 
 
