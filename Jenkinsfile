@@ -148,6 +148,73 @@ pipeline {
                 }
             }
         }
+
+        // =====================================================
+        // 9. APPLY HORIZONTAL POD AUTOSCALER
+        // =====================================================
+        stage('Configure Pod Autoscaling') {
+            steps {
+                sh '''
+                    set -eu
+
+                    echo "Applying HPA configuration..."
+
+                    kubectl apply \
+                        -f kubernetes/deployment/nextjs-website-hpa.yaml
+
+                    echo "Checking HPA..."
+
+                    kubectl get hpa nextjs-website-hpa
+
+                    echo "HPA details:"
+
+                    kubectl describe hpa nextjs-website-hpa
+                '''
+            }
+        }
+
+        // =====================================================
+        // 10. VERIFY DEPLOYMENT
+        // =====================================================
+        stage('Verify Deployment') {
+            steps {
+                sh '''
+                    set -eu
+
+                    echo "========================================"
+                    echo "DEPLOYMENT STATUS"
+                    echo "========================================"
+
+                    kubectl get deployment nextjs-website
+
+                    echo "========================================"
+                    echo "APPLICATION PODS"
+                    echo "========================================"
+
+                    kubectl get pods \
+                        -l app=nextjs-website \
+                        -o wide
+
+                    echo "========================================"
+                    echo "APPLICATION SERVICE"
+                    echo "========================================"
+
+                    kubectl get service nextjs-website-service
+
+                    echo "========================================"
+                    echo "HORIZONTAL POD AUTOSCALER"
+                    echo "========================================"
+
+                    kubectl get hpa nextjs-website-hpa
+
+                    echo "========================================"
+                    echo "TARGET GROUP BINDING"
+                    echo "========================================"
+
+                    kubectl get targetgroupbinding nextjs-website-tgb
+                '''
+            }
+        }
     }
 
     post {

@@ -231,3 +231,35 @@ kubectl describe targetgroupbinding nextjs-website-tgb -n default
 kubectl describe targetgroupbinding html-test-tgb
 kubectl -n kube-system logs deploy/aws-load-balancer-controller --tail=50
 ```
+
+
+## auto scale
+
+## Check whether the add-on already exists
+
+aws eks list-addons \
+  --cluster-name othm-eks-prod \
+  --region us-east-1
+
+## If metrics-server is not listed, install it:
+
+aws eks create-addon --cluster-name othm-eks-prod --addon-name metrics-server
+
+{
+    "addon": {
+        "addonName": "metrics-server",
+        "clusterName": "othm-eks-prod",
+        "status": "CREATING",
+        "addonVersion": "v0.9.0-eksbuild.13",
+        "health": {
+            "issues": []
+        },
+        "addonArn": "arn:aws:eks:us-east-1:125022369875:addon/othm-eks-prod/metrics-server/b2d0a9d2-a1fe-a8e9-1d94-501504093818",
+        "createdAt": "2026-10-19T10:11:42.401000+00:00",
+        "modifiedAt": "2026-10-19T10:11:42.419000+00:00",
+        "tags": {},
+        "namespaceConfig": {
+            "namespace": "kube-system"
+        }
+    }
+}

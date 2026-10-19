@@ -129,3 +129,11 @@ kubectl version --client
 ```bash
 sudo usermod -aG docker jenkins
 ```
+
+## Check installation progress:
+
+aws eks describe-addon \
+  --cluster-name othm-eks-prod \
+  --addon-name metrics-server \
+  --region us-east-1 \
+  --query 'addon.{Status:status,Version:addonVersion,Issues:health.issues}'

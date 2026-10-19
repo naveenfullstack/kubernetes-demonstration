@@ -152,6 +152,10 @@ resource "aws_iam_role_policy" "jenkins_network_read" {
           "eks:DescribeClusterVersions",
           "eks:TagResource",
 
+          "eks:ListAddons",
+          "eks:CreateAddon",
+          "eks:DescribeAddon",
+
           # Auto Scaling diagnostics
           "autoscaling:DescribeAutoScalingGroups",
           "autoscaling:DescribeScalingActivities",

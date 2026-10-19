@@ -1,0 +1,1773 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>k6 Load Test Studio</title>
+    <style>
+      :root {
+        --bg: #f6f6fa;
+        --card: #fff;
+        --line: #e6e6ef;
+        --ink: #2b2b3c;
+        --muted: #8a8aa3;
+        --purple: #6c3df5;
+        --purple-soft: #efeaff;
+        --cyan: #22d3ee;
+        --green: #22c55e;
+        --amber: #f59e0b;
+        --red: #ef4444;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          14px/1.5 -apple-system,
+          BlinkMacSystemFont,
+          "Inter",
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 28px;
+        background: #fff;
+        border-bottom: 1px solid var(--line);
+      }
+      header h1 {
+        font-size: 18px;
+        margin: 0;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      header h1 span.logo {
+        display: inline-grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: var(--purple);
+        color: #fff;
+        font-weight: 700;
+        font-size: 13px;
+      }
+      nav {
+        display: flex;
+        gap: 6px;
+      }
+      nav button {
+        border: 0;
+        background: transparent;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font: inherit;
+        color: var(--muted);
+        cursor: pointer;
+        font-weight: 600;
+      }
+      nav button.active {
+        background: var(--purple-soft);
+        color: var(--purple);
+      }
+      main {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 24px 20px 60px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        box-shadow: 0 1px 3px rgba(30, 30, 60, 0.04);
+        margin-bottom: 20px;
+      }
+      .card > h3 {
+        margin: 0;
+        padding: 16px 22px;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        color: #5b5b75;
+        border-bottom: 1px solid var(--line);
+        font-weight: 600;
+      }
+      .pad {
+        padding: 20px 22px;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: #5b5b75;
+        margin-bottom: 4px;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        font: inherit;
+        padding: 9px 11px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        color: var(--ink);
+      }
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: 2px solid var(--purple-soft);
+        border-color: var(--purple);
+      }
+      textarea {
+        font-family: ui-monospace, Menlo, monospace;
+        font-size: 12.5px;
+        min-height: 90px;
+      }
+      .grid {
+        display: grid;
+        gap: 14px;
+      }
+      .g2 {
+        grid-template-columns: 1fr 1fr;
+      }
+      .g4 {
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+      }
+      @media (max-width: 760px) {
+        .g2,
+        .g4 {
+          grid-template-columns: 1fr;
+        }
+      }
+      button.btn {
+        border: 0;
+        background: var(--purple);
+        color: #fff;
+        padding: 9px 16px;
+        border-radius: 8px;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button.btn:hover {
+        filter: brightness(1.08);
+      }
+      button.ghost {
+        background: var(--purple-soft);
+        color: var(--purple);
+      }
+      button.icon {
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 8px;
+        width: 36px;
+        height: 36px;
+        cursor: pointer;
+        color: #c0392b;
+        font-size: 16px;
+      }
+      .stage {
+        display: grid;
+        grid-template-columns: 28px 1fr 1fr 36px;
+        gap: 10px;
+        align-items: end;
+        margin-bottom: 10px;
+      }
+      .stage .n {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: var(--purple-soft);
+        color: var(--purple);
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        font-size: 12px;
+        margin-bottom: 5px;
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .chip {
+        padding: 5px 11px;
+        border-radius: 99px;
+        border: 1px solid var(--line);
+        background: #fff;
+        cursor: pointer;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #5b5b75;
+      }
+      .chip:hover {
+        border-color: var(--purple);
+        color: var(--purple);
+      }
+      pre {
+        margin: 0;
+        background: #17172b;
+        color: #d7d7ee;
+        padding: 18px 20px;
+        border-radius: 0 0 10px 10px;
+        overflow: auto;
+        font:
+          12.5px/1.6 ui-monospace,
+          Menlo,
+          monospace;
+        max-height: 520px;
+      }
+      .codehead {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 22px;
+        border-bottom: 1px solid var(--line);
+      }
+      .cmd {
+        background: #17172b;
+        color: #a5f3c0;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font:
+          13px ui-monospace,
+          Menlo,
+          monospace;
+        overflow: auto;
+        margin-top: 8px;
+        white-space: pre;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .small {
+        font-size: 12.5px;
+      }
+      .err {
+        color: var(--red);
+        font-size: 12.5px;
+        margin-top: 6px;
+      }
+      .drop {
+        border: 2px dashed #cfc6f7;
+        border-radius: 12px;
+        padding: 30px;
+        text-align: center;
+        background: #fbfaff;
+        cursor: pointer;
+      }
+      .drop.over {
+        background: var(--purple-soft);
+        border-color: var(--purple);
+      }
+      .drop b {
+        color: var(--purple);
+      }
+      /* results */
+      .meta {
+        display: flex;
+        gap: 30px;
+        align-items: center;
+        padding: 14px 4px 18px;
+        color: #5b5b75;
+        flex-wrap: wrap;
+      }
+      .meta div {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .meta svg {
+        width: 18px;
+        height: 18px;
+        color: #a9a9be;
+      }
+      .meta .loc svg {
+        color: var(--purple);
+      }
+      .meta .loc {
+        color: var(--purple);
+        font-weight: 600;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        padding: 22px 0 6px;
+      }
+      .stat {
+        padding: 0 22px;
+        border-left: 1px solid var(--line);
+      }
+      .stat:first-child {
+        border-left: 0;
+      }
+      .stat .k {
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        color: #6d6d86;
+        font-weight: 500;
+      }
+      .stat .v {
+        font-size: 40px;
+        line-height: 1.15;
+        font-weight: 600;
+        color: var(--purple);
+        letter-spacing: -0.02em;
+      }
+      .stat .v small {
+        font-size: 15px;
+        color: #8a8aa3;
+        font-weight: 400;
+        margin-left: 6px;
+        letter-spacing: 0;
+      }
+      .stat.bad .v {
+        color: var(--red);
+      }
+      @media (max-width: 760px) {
+        .stats {
+          grid-template-columns: 1fr 1fr;
+          gap: 14px;
+        }
+        .stat:nth-child(3) {
+          border-left: 0;
+        }
+      }
+      .chartwrap {
+        position: relative;
+        padding: 0 14px 10px;
+      }
+      canvas {
+        width: 100%;
+        height: 320px;
+        display: block;
+      }
+      .tip {
+        position: absolute;
+        pointer-events: none;
+        background: #17172b;
+        color: #fff;
+        font-size: 12px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        display: none;
+        white-space: nowrap;
+        z-index: 3;
+        line-height: 1.55;
+      }
+      .legend {
+        display: flex;
+        gap: 10px;
+        padding: 0 22px 18px;
+        flex-wrap: wrap;
+      }
+      .legend .chip {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .legend i {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+      .legend .chip.off {
+        opacity: 0.4;
+      }
+      .foot {
+        display: flex;
+        gap: 18px;
+        align-items: center;
+        padding: 6px 6px 20px;
+        color: #5b5b75;
+        flex-wrap: wrap;
+      }
+      .foot svg {
+        width: 26px;
+        height: 26px;
+      }
+      .foot span.sep {
+        width: 1px;
+        height: 18px;
+        background: var(--line);
+      }
+      .foot b {
+        font-weight: 600;
+        color: var(--ink);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 9px 22px;
+        border-bottom: 1px solid var(--line);
+        font-size: 13.5px;
+      }
+      th {
+        font-size: 11.5px;
+        letter-spacing: 0.06em;
+        color: #6d6d86;
+        font-weight: 600;
+      }
+      tr:last-child td {
+        border-bottom: 0;
+      }
+      .ok {
+        color: var(--green);
+        font-weight: 600;
+      }
+      .bad-t {
+        color: var(--red);
+        font-weight: 600;
+      }
+      .note {
+        background: #fff8e6;
+        border: 1px solid #f6e3a6;
+        color: #7a5b00;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        margin: 0 22px 16px;
+      }
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1><span class="logo">k6</span> Load Test Studio</h1>
+      <nav>
+        <button id="tab-build" class="active">1 · Build script</button>
+        <button id="tab-results">2 · Results</button>
+      </nav>
+    </header>
+
+    <main>
+      <!-- ============ BUILD ============ -->
+      <section id="view-build">
+        <div class="card">
+          <h3>TARGET</h3>
+          <div class="pad grid">
+            <div class="grid g4">
+              <div>
+                <label>URL</label><input id="url" value="https://test.k6.io" />
+              </div>
+              <div>
+                <label>Method</label>
+                <select id="method">
+                  <option>GET</option>
+                  <option>POST</option>
+                  <option>PUT</option>
+                  <option>PATCH</option>
+                  <option>DELETE</option>
+                </select>
+              </div>
+              <div>
+                <label>Sleep between iterations (s)</label
+                ><input id="sleep" type="number" min="0" step="0.1" value="1" />
+              </div>
+              <div>
+                <label>Expected status</label
+                ><input id="status" type="number" value="200" />
+              </div>
+            </div>
+            <div class="grid g2">
+              <div>
+                <label>Headers (JSON, optional)</label
+                ><textarea
+                  id="headers"
+                  placeholder='{"Authorization":"Bearer ..."}'
+                ></textarea>
+              </div>
+              <div>
+                <label>Body (optional, for POST/PUT/PATCH)</label
+                ><textarea id="body" placeholder='{"hello":"world"}'></textarea>
+              </div>
+            </div>
+            <div class="grid g2">
+              <div>
+                <label>Threshold: p(95) response time under (ms)</label
+                ><input id="thP95" type="number" value="1000" />
+              </div>
+              <div>
+                <label>Threshold: failed request rate under (%)</label
+                ><input id="thFail" type="number" step="0.1" value="1" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>STAGES</h3>
+          <div class="pad">
+            <div class="row" style="margin-bottom: 14px">
+              <span class="muted small">Presets:</span>
+              <button class="chip" data-preset="default">Your example</button>
+              <button class="chip" data-preset="smoke">Smoke</button>
+              <button class="chip" data-preset="stress">Stress</button>
+              <button class="chip" data-preset="spike">Spike</button>
+              <button class="chip" data-preset="soak">Soak</button>
+            </div>
+            <div id="stages"></div>
+            <div class="row" style="margin-top: 6px">
+              <button class="btn ghost" id="addStage">+ Add stage</button>
+              <span class="muted small" id="stageSummary"></span>
+            </div>
+            <div id="stageErr" class="err"></div>
+            <div style="margin-top: 16px" id="stagePreview"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="codehead">
+            <strong class="small" style="letter-spacing: 0.08em; color: #5b5b75"
+              >GENERATED load-test.js</strong
+            >
+            <div class="row">
+              <button class="btn ghost" id="copy">Copy</button>
+              <button class="btn" id="download">Download load-test.js</button>
+            </div>
+          </div>
+          <pre id="code"></pre>
+          <div class="pad">
+            <div class="small">
+              <b>Run it locally</b> (saves everything the dashboard needs):
+            </div>
+            <div class="cmd" id="cmd">
+              k6 run --out json=results.json load-test.js
+            </div>
+            <p class="muted small" style="margin: 10px 0 0">
+              This writes <code>results.json</code> (every data point, used for
+              the timeline chart) and <code>summary.json</code> (final totals)
+              next to your script, and still prints the normal k6 terminal
+              summary. When it finishes, go to <b>Results</b> and drop either
+              file in — or paste the terminal output.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ RESULTS ============ -->
+      <section id="view-results" class="hidden">
+        <div id="loader">
+          <div class="card">
+            <h3>LOAD YOUR K6 RESULTS</h3>
+            <div class="pad grid">
+              <div class="drop" id="drop">
+                <div style="font-size: 30px">📈</div>
+                <div>
+                  <b>Drop results.json or summary.json here</b>, or click to
+                  choose
+                </div>
+                <div class="muted small" style="margin-top: 6px">
+                  <code>results.json</code> (from <code>--out json=</code>)
+                  gives the full timeline · <code>summary.json</code> gives
+                  totals only
+                </div>
+                <input
+                  type="file"
+                  id="file"
+                  accept=".json,.txt,.log,.ndjson"
+                  style="display: none"
+                />
+              </div>
+              <div>
+                <label>…or paste the k6 terminal output (or JSON)</label>
+                <textarea
+                  id="paste"
+                  style="min-height: 180px"
+                  placeholder="naveen@Naveens-MacBook-Air k6-test % k6 run load-test.js&#10;…"
+                ></textarea>
+                <div class="row" style="margin-top: 10px">
+                  <button class="btn" id="parsePaste">Show dashboard</button>
+                  <button class="btn ghost" id="demo">Load demo data</button>
+                </div>
+                <div id="loadErr" class="err"></div>
+                <div id="loadBusy" class="muted small"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="dash" class="hidden">
+          <div
+            class="row"
+            style="justify-content: flex-end; margin-bottom: -6px"
+          >
+            <button class="btn ghost" id="again">Load another result</button>
+          </div>
+          <div class="meta" id="meta"></div>
+
+          <div class="card">
+            <h3>PERFORMANCE OVERVIEW</h3>
+            <div class="stats" id="stats"></div>
+            <div id="chartNote"></div>
+            <div class="chartwrap">
+              <canvas id="chart"></canvas>
+              <div class="tip" id="tip"></div>
+            </div>
+            <div class="legend" id="legend"></div>
+          </div>
+
+          <div class="foot" id="foot"></div>
+
+          <div class="card">
+            <h3>RESPONSE TIME</h3>
+            <div id="rt"></div>
+          </div>
+          <div class="card">
+            <h3>THRESHOLDS &amp; CHECKS</h3>
+            <div id="th"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      /* =========================================================
+   Helpers
+   ========================================================= */
+      const $ = (s) => document.querySelector(s);
+      const esc = (s) =>
+        String(s).replace(
+          /[&<>"]/g,
+          (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
+        );
+      const DUR_RE = /^\d+(\.\d+)?(ms|s|m|h)$/;
+      function parseDurMs(str) {
+        // "3m0s", "30s", "1h2m"
+        let ms = 0,
+          m,
+          re = /(\d+(?:\.\d+)?)(ms|s|m|h)/g,
+          ok = false;
+        while ((m = re.exec(str))) {
+          ok = true;
+          const n = parseFloat(m[1]);
+          ms += n * { ms: 1, s: 1000, m: 60000, h: 3600000 }[m[2]];
+        }
+        return ok ? ms : NaN;
+      }
+      function parseLatMs(str) {
+        // "292.65ms", "1.2s", "850µs"
+        const m = /^([\d.]+)\s*(µs|us|ms|s|m|h)$/.exec(str.trim());
+        if (!m) return NaN;
+        return (
+          parseFloat(m[1]) *
+          { µs: 0.001, us: 0.001, ms: 1, s: 1000, m: 60000, h: 3600000 }[m[2]]
+        );
+      }
+      function fmtDur(ms) {
+        const s = Math.round(ms / 1000),
+          h = Math.floor(s / 3600),
+          m = Math.floor((s % 3600) / 60),
+          r = s % 60;
+        if (h) return `${h}h ${m}m`;
+        if (m) return r ? `${m}m ${r}s` : `${m} min`;
+        return `${r}s`;
+      }
+      function fmtK(n) {
+        return n >= 1e6
+          ? (n / 1e6).toFixed(1) + "M"
+          : n >= 1000
+            ? (n / 1000).toFixed(1) + "K"
+            : String(Math.round(n));
+      }
+      function fmtMs(v) {
+        return v == null || isNaN(v)
+          ? "–"
+          : v >= 1000
+            ? (v / 1000).toFixed(2) + " s"
+            : v.toFixed(v < 10 ? 2 : 1) + " ms";
+      }
+      function fmtBytes(b) {
+        if (b == null) return "–";
+        const u = ["B", "kB", "MB", "GB"];
+        let i = 0;
+        while (b >= 1000 && i < 3) {
+          b /= 1000;
+          i++;
+        }
+        return b.toFixed(i ? 1 : 0) + " " + u[i];
+      }
+      function pct(sorted, p) {
+        if (!sorted.length) return NaN;
+        const i = (sorted.length - 1) * p,
+          lo = Math.floor(i),
+          hi = Math.ceil(i);
+        return sorted[lo] + (sorted[hi] - sorted[lo]) * (i - lo);
+      }
+      function nice(max) {
+        if (max <= 0) return 1;
+        const e = Math.pow(10, Math.floor(Math.log10(max))),
+          f = max / e;
+        return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * e;
+      }
+      const pad2 = (n) => String(n).padStart(2, "0");
+
+      /* =========================================================
+   Tabs
+   ========================================================= */
+      function showTab(t) {
+        $("#view-build").classList.toggle("hidden", t !== "build");
+        $("#view-results").classList.toggle("hidden", t !== "results");
+        $("#tab-build").classList.toggle("active", t === "build");
+        $("#tab-results").classList.toggle("active", t === "results");
+        if (t === "results" && model) requestAnimationFrame(() => drawChart());
+      }
+      $("#tab-build").onclick = () => showTab("build");
+      $("#tab-results").onclick = () => showTab("results");
+
+      /* =========================================================
+   BUILD: stages + script generation
+   ========================================================= */
+      const PRESETS = {
+        default: [
+          ["30s", 10],
+          ["1m", 25],
+          ["1m", 50],
+          ["30s", 0],
+        ],
+        smoke: [
+          ["30s", 2],
+          ["1m", 2],
+          ["10s", 0],
+        ],
+        stress: [
+          ["2m", 50],
+          ["5m", 50],
+          ["2m", 100],
+          ["5m", 100],
+          ["2m", 200],
+          ["5m", 200],
+          ["5m", 0],
+        ],
+        spike: [
+          ["10s", 10],
+          ["1m", 10],
+          ["10s", 200],
+          ["3m", 200],
+          ["10s", 10],
+          ["3m", 10],
+          ["10s", 0],
+        ],
+        soak: [
+          ["2m", 50],
+          ["30m", 50],
+          ["2m", 0],
+        ],
+      };
+      let stages = PRESETS.default.map(([d, t]) => ({ d, t }));
+      try {
+        const s = JSON.parse(localStorage.getItem("k6studio.stages") || "null");
+        if (Array.isArray(s) && s.length) stages = s;
+      } catch (e) {}
+
+      function renderStages() {
+        const box = $("#stages");
+        box.innerHTML = "";
+        stages.forEach((st, i) => {
+          const row = document.createElement("div");
+          row.className = "stage";
+          row.innerHTML = `<div class="n">${i + 1}</div>
+      <div><label>Duration</label><input data-k="d" value="${esc(st.d)}" placeholder="30s, 1m, 2h"></div>
+      <div><label>Target VUs</label><input data-k="t" type="number" min="0" value="${esc(st.t)}"></div>
+      <button class="icon" title="Remove" ${stages.length === 1 ? 'disabled style="opacity:.4"' : ""}>×</button>`;
+          row.querySelectorAll("input").forEach(
+            (inp) =>
+              (inp.oninput = (e) => {
+                stages[i][e.target.dataset.k] =
+                  e.target.dataset.k === "t"
+                    ? e.target.value === ""
+                      ? ""
+                      : Number(e.target.value)
+                    : e.target.value.trim();
+                update(false);
+              }),
+          );
+          row.querySelector("button").onclick = () => {
+            if (stages.length > 1) {
+              stages.splice(i, 1);
+              renderStages();
+              update(false);
+            }
+          };
+          box.appendChild(row);
+        });
+      }
+      $("#addStage").onclick = () => {
+        const last = stages[stages.length - 1];
+        stages.push({ d: "1m", t: last ? last.t : 10 });
+        renderStages();
+        update(false);
+        const ins = $("#stages").querySelectorAll(".stage");
+        ins[ins.length - 1].querySelector("input").focus();
+      };
+      document.querySelectorAll("[data-preset]").forEach(
+        (b) =>
+          (b.onclick = () => {
+            stages = PRESETS[b.dataset.preset].map(([d, t]) => ({ d, t }));
+            renderStages();
+            update(false);
+          }),
+      );
+
+      function stageErrors() {
+        const errs = [];
+        stages.forEach((s, i) => {
+          if (!DUR_RE.test(String(s.d)))
+            errs.push(
+              `Stage ${i + 1}: duration "${s.d}" should look like 30s, 1m or 2h.`,
+            );
+          if (s.t === "" || isNaN(s.t) || s.t < 0)
+            errs.push(`Stage ${i + 1}: target must be a number ≥ 0.`);
+        });
+        return errs;
+      }
+
+      function stagePreviewSvg() {
+        const pts = [[0, 0]];
+        let t = 0;
+        stages.forEach((s) => {
+          const d = parseDurMs(String(s.d));
+          if (isNaN(d)) return;
+          t += d;
+          pts.push([t, +s.t || 0]);
+        });
+        if (t === 0) return "";
+        const max = Math.max(1, ...pts.map((p) => p[1])),
+          W = 1000,
+          H = 110;
+        const xy = (p) =>
+          `${((p[0] / t) * W).toFixed(1)},${(H - 8 - (p[1] / max) * (H - 24)).toFixed(1)}`;
+        const line = pts.map(xy).join(" ");
+        return `<div class="small muted" style="margin-bottom:4px">Planned load profile · max ${max} VUs · ${fmtDur(t)}</div>
+  <svg viewBox="0 0 ${W} ${H}" width="100%" height="110" preserveAspectRatio="none" style="background:#fbfaff;border-radius:8px">
+   <polygon points="0,${H - 8} ${line} ${W},${H - 8}" fill="rgba(34,211,238,.25)"/>
+   <polyline points="${line}" fill="none" stroke="#22d3ee" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg>`;
+      }
+
+      function buildScript() {
+        const url = $("#url").value.trim() || "https://test.k6.io";
+        const method = $("#method").value;
+        const sleepS = parseFloat($("#sleep").value);
+        const status = parseInt($("#status").value) || 200;
+        let headers = null;
+        const h = $("#headers").value.trim();
+        if (h) {
+          try {
+            headers = JSON.parse(h);
+          } catch (e) {
+            headers = "__invalid__";
+          }
+        }
+        const body = $("#body").value;
+        const p95 = parseFloat($("#thP95").value) || 1000;
+        const fail = (parseFloat($("#thFail").value) || 1) / 100;
+
+        const stageLines = stages
+          .map((s) => `    { duration: '${s.d}', target: ${s.t} },`)
+          .join("\n");
+        let call;
+        const hdrParams =
+          headers && headers !== "__invalid__"
+            ? `, { headers: ${JSON.stringify(headers)} }`
+            : "";
+        if (method === "GET" || (method === "DELETE" && !body)) {
+          call =
+            method === "GET"
+              ? `http.get(${JSON.stringify(url)}${hdrParams})`
+              : `http.del(${JSON.stringify(url)}, null${hdrParams})`;
+        } else {
+          const fn = {
+            POST: "post",
+            PUT: "put",
+            PATCH: "patch",
+            DELETE: "del",
+          }[method];
+          call = `http.${fn}(${JSON.stringify(url)}, ${JSON.stringify(body)}${hdrParams})`;
+        }
+        const lines = [
+          `import http from 'k6/http';`,
+          `import { check, sleep } from 'k6';`,
+          `import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.2/index.js';`,
+          ``,
+          `export const options = {`,
+          `  stages: [`,
+          stageLines,
+          `  ],`,
+          `  thresholds: {`,
+          `    http_req_duration: ['p(95)<${p95}'],`,
+          `    http_req_failed: ['rate<${fail}'],`,
+          `  },`,
+          `};`,
+          ``,
+          `export default function () {`,
+          `  const res = ${call};`,
+          `  check(res, { 'status is ${status}': (r) => r.status === ${status} });`,
+          sleepS > 0 ? `  sleep(${sleepS});` : null,
+          `}`,
+          ``,
+          `// Writes totals to summary.json and keeps the normal terminal summary`,
+          `export function handleSummary(data) {`,
+          `  return {`,
+          `    stdout: textSummary(data, { indent: ' ', enableColors: true }),`,
+          `    'summary.json': JSON.stringify(data, null, 2),`,
+          `  };`,
+          `}`,
+          ``,
+        ];
+        return lines.filter((l) => l !== null).join("\n");
+      }
+
+      function update() {
+        try {
+          localStorage.setItem("k6studio.stages", JSON.stringify(stages));
+        } catch (e) {}
+        const errs = stageErrors();
+        $("#stageErr").innerHTML = errs.map(esc).join("<br>");
+        const total = stages.reduce(
+            (a, s) => a + (parseDurMs(String(s.d)) || 0),
+            0,
+          ),
+          max = Math.max(0, ...stages.map((s) => +s.t || 0));
+        $("#stageSummary").textContent =
+          `${stages.length} stage${stages.length > 1 ? "s" : ""} · ${fmtDur(total)} total · peak ${max} VUs`;
+        $("#stagePreview").innerHTML = errs.length ? "" : stagePreviewSvg();
+        const hv = $("#headers").value.trim();
+        let bad = false;
+        if (hv) {
+          try {
+            JSON.parse(hv);
+          } catch (e) {
+            bad = true;
+          }
+        }
+        $("#code").textContent =
+          buildScript() +
+          (bad ? "\n// ⚠ headers JSON is invalid and was ignored" : "");
+      }
+      [
+        "url",
+        "method",
+        "sleep",
+        "status",
+        "headers",
+        "body",
+        "thP95",
+        "thFail",
+      ].forEach((id) => $("#" + id).addEventListener("input", () => update()));
+      $("#copy").onclick = async () => {
+        try {
+          await navigator.clipboard.writeText($("#code").textContent);
+          $("#copy").textContent = "Copied ✓";
+          setTimeout(() => ($("#copy").textContent = "Copy"), 1500);
+        } catch (e) {}
+      };
+      $("#download").onclick = () => {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(
+          new Blob([$("#code").textContent], { type: "text/javascript" }),
+        );
+        a.download = "load-test.js";
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      };
+
+      /* =========================================================
+   RESULTS: parsing
+   model = { source, start(Date), t:{reqs,failed,avg,min,med,max,p90,p95,rps,peakRps,vusMax,durMs,rx,tx,checksOk,checksFail}, thresholds:[{metric,expr,ok}], series|null, plannedStages|null }
+   ========================================================= */
+      let model = null;
+
+      async function readLines(file, cb) {
+        const reader = file.stream().getReader(),
+          dec = new TextDecoder();
+        let buf = "";
+        for (;;) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buf += dec.decode(value, { stream: true });
+          let start = 0,
+            i;
+          while ((i = buf.indexOf("\n", start)) >= 0) {
+            cb(buf.slice(start, i));
+            start = i + 1;
+          }
+          buf = buf.slice(start);
+        }
+        if (buf) cb(buf);
+      }
+
+      function ndjsonAggregator() {
+        const a = {
+          t0: Infinity,
+          t1: -Infinity,
+          sec: new Map(),
+          all: [],
+          reqs: 0,
+          failed: 0,
+          vusMax: 0,
+          rx: 0,
+          tx: 0,
+          cOk: 0,
+          cBad: 0,
+        };
+        const B = (s) => {
+          let b = a.sec.get(s);
+          if (!b) {
+            b = { n: 0, f: 0, d: [], vus: 0 };
+            a.sec.set(s, b);
+          }
+          return b;
+        };
+        const pts = []; // keep until t0 known? points are ~time-ordered; store sec relative to first seen & fix later
+        a.push = (line) => {
+          line = line.trim();
+          if (!line) return;
+          let o;
+          try {
+            o = JSON.parse(line);
+          } catch (e) {
+            return;
+          }
+          if (o.type !== "Point" || !o.data) return;
+          const t = Date.parse(o.data.time),
+            v = o.data.value;
+          if (isNaN(t)) return;
+          if (t < a.t0) a.t0 = t;
+          if (t > a.t1) a.t1 = t;
+          pts.push([o.metric, t, v]);
+        };
+        a.finish = () => {
+          for (const [m, t, v] of pts) {
+            const s = Math.floor((t - a.t0) / 1000);
+            switch (m) {
+              case "http_reqs":
+                B(s).n += v;
+                a.reqs += v;
+                break;
+              case "http_req_duration":
+                B(s).d.push(v);
+                a.all.push(v);
+                break;
+              case "http_req_failed":
+                if (v) {
+                  B(s).f += 1;
+                  a.failed += 1;
+                }
+                break;
+              case "vus": {
+                const b = B(s);
+                if (v > b.vus) b.vus = v;
+                if (v > a.vusMax) a.vusMax = v;
+                break;
+              }
+              case "data_received":
+                a.rx += v;
+                break;
+              case "data_sent":
+                a.tx += v;
+                break;
+              case "checks":
+                v ? a.cOk++ : a.cBad++;
+                break;
+            }
+          }
+          pts.length = 0;
+          return a;
+        };
+        return a;
+      }
+
+      function modelFromNdjson(a) {
+        const durMs = Math.max(1000, a.t1 - a.t0),
+          totalSec = Math.ceil(durMs / 1000);
+        const sorted = Float64Array.from(a.all).sort();
+        const sum = a.all.reduce((x, y) => x + y, 0);
+        const binW = Math.max(1, Math.ceil(totalSec / 60));
+        const series = [];
+        let carryVus = 0;
+        for (let s = 0; s <= totalSec; s += binW) {
+          let n = 0,
+            f = 0,
+            d = [],
+            vus = 0;
+          for (let k = s; k < s + binW; k++) {
+            const b = a.sec.get(k);
+            if (!b) continue;
+            n += b.n;
+            f += b.f;
+            if (b.d.length) d = d.concat(b.d);
+            vus = Math.max(vus, b.vus);
+          }
+          if (vus) carryVus = vus;
+          else vus = carryVus;
+          const ds = d.sort((x, y) => x - y);
+          series.push({
+            t: s,
+            vus,
+            rps: n / binW,
+            fail: f,
+            avg: d.length ? d.reduce((x, y) => x + y, 0) / d.length : null,
+            p95: d.length ? pct(ds, 0.95) : null,
+          });
+        }
+        let peak = 0;
+        for (const b of a.sec.values()) if (b.n > peak) peak = b.n;
+        return {
+          source: "results.json (full timeline)",
+          start: new Date(a.t0),
+          t: {
+            reqs: a.reqs || a.all.length,
+            failed: a.failed,
+            avg: sum / (a.all.length || 1),
+            min: sorted[0],
+            med: pct(sorted, 0.5),
+            max: sorted[sorted.length - 1],
+            p90: pct(sorted, 0.9),
+            p95: pct(sorted, 0.95),
+            rps: (a.reqs || a.all.length) / (durMs / 1000),
+            peakRps: peak,
+            vusMax: a.vusMax,
+            durMs,
+            rx: a.rx || null,
+            tx: a.tx || null,
+            checksOk: a.cOk,
+            checksFail: a.cBad,
+          },
+          thresholds: null,
+          series,
+        };
+      }
+
+      function modelFromSummaryJson(d) {
+        const M = d.metrics || {};
+        const V = (n) => {
+          const m = M[n];
+          return m ? m.values || m : null;
+        };
+        const dur = V("http_req_duration") || {},
+          reqs = V("http_reqs") || {},
+          fl = V("http_req_failed") || {},
+          vm = V("vus_max") || V("vus") || {},
+          rx = V("data_received"),
+          tx = V("data_sent"),
+          ck = V("checks");
+        const durMs = (d.state && d.state.testRunDurationMs) || 0;
+        const count = reqs.count || 0;
+        const failRate = fl.rate != null ? fl.rate : fl.value || 0;
+        const th = [];
+        for (const [name, m] of Object.entries(M)) {
+          if (m.thresholds)
+            for (const [expr, r] of Object.entries(m.thresholds)) {
+              if (r && typeof r === "object")
+                th.push({ metric: name, expr, ok: !!r.ok });
+            }
+        }
+        return {
+          source: "summary.json (totals only)",
+          start: new Date(),
+          t: {
+            reqs: count,
+            failed:
+              fl.passes != null ? fl.passes : Math.round(failRate * count),
+            avg: dur.avg,
+            min: dur.min,
+            med: dur.med,
+            max: dur.max,
+            p90: dur["p(90)"],
+            p95: dur["p(95)"],
+            rps: reqs.rate,
+            peakRps: null,
+            vusMax: vm.max != null ? vm.max : vm.value,
+            durMs,
+            rx: rx && rx.count,
+            tx: tx && tx.count,
+            checksOk: ck && ck.passes,
+            checksFail: ck && ck.fails,
+          },
+          thresholds: th,
+          series: null,
+        };
+      }
+
+      function modelFromTerminal(raw) {
+        const txt = raw.replace(/\x1b\[[0-9;]*m/g, "");
+        const kv = (name) => {
+          const m = new RegExp("^\\s*" + name + "\\.+:\\s*(.+)$", "m").exec(
+            txt,
+          );
+          return m ? m[1] : null;
+        };
+        const dline = kv("http_req_duration");
+        if (!dline)
+          throw new Error(
+            "Could not find http_req_duration in the pasted text. Paste the whole k6 summary.",
+          );
+        const g = (k) => {
+          const m = new RegExp(
+            "(?:^|\\s)" +
+              k.replace(/[()]/g, "\\$&") +
+              "=([\\d.]+\\s?(?:µs|us|ms|s|m|h))",
+          ).exec(dline);
+          return m ? parseLatMs(m[1]) : NaN;
+        };
+        const rq = /^\s*http_reqs\.+:\s*(\d+)\s+([\d.]+)\/s/m.exec(txt);
+        const fl = /^\s*http_req_failed\.+:\s*([\d.]+)%/m.exec(txt);
+        const reqs = rq ? +rq[1] : 0;
+        const failed = fl ? Math.round((parseFloat(fl[1]) / 100) * reqs) : 0;
+        const vm =
+          /^\s*vus_max\.+:\s*(\d+)/m.exec(txt) ||
+          /(\d+) max VUs/.exec(txt) ||
+          /Up to (\d+) looping VUs/.exec(txt);
+        const run = /running \(([^)]+)\)/.exec(txt);
+        const byt = (n) => {
+          const m = new RegExp(n + "\\.+:\\s*([\\d.]+)\\s*(kB|MB|GB|B)").exec(
+            txt,
+          );
+          return m
+            ? parseFloat(m[1]) * { B: 1, kB: 1e3, MB: 1e6, GB: 1e9 }[m[2]]
+            : null;
+        };
+        const ck = /checks_succeeded\.+:\s*[\d.]+%\s+(\d+) out of (\d+)/.exec(
+          txt,
+        );
+        const th = [];
+        let header = "";
+        txt.split("\n").forEach((l) => {
+          const h = /^\s*([a-z_]+)\s*$/.exec(l);
+          if (h && l.trim() !== "THRESHOLDS") header = h[1];
+          const t = /^\s*([✓✗])\s+'([^']+)'/.exec(l);
+          if (t) th.push({ metric: header, expr: t[2], ok: t[1] === "✓" });
+        });
+        return {
+          source: "terminal output (totals only)",
+          start: new Date(),
+          t: {
+            reqs,
+            failed,
+            avg: g("avg"),
+            min: g("min"),
+            med: g("med"),
+            max: g("max"),
+            p90: g("p(90)"),
+            p95: g("p(95)"),
+            rps: rq ? +rq[2] : null,
+            peakRps: null,
+            vusMax: vm ? +vm[1] : null,
+            durMs: run ? parseDurMs(run[1]) : 0,
+            rx: byt("data_received"),
+            tx: byt("data_sent"),
+            checksOk: ck ? +ck[1] : null,
+            checksFail: ck ? +ck[2] - +ck[1] : null,
+          },
+          thresholds: th,
+          series: null,
+        };
+      }
+
+      async function handleFile(file) {
+        $("#loadErr").textContent = "";
+        $("#loadBusy").textContent = `Reading ${file.name}…`;
+        try {
+          const head = await file.slice(0, 400).text();
+          let m;
+          if (/"type"\s*:\s*"(Metric|Point)"/.test(head)) {
+            const agg = ndjsonAggregator();
+            await readLines(file, agg.push);
+            const a = agg.finish();
+            if (!isFinite(a.t0))
+              throw new Error("No data points found in that file.");
+            m = modelFromNdjson(a);
+          } else if (head.trim().startsWith("{")) {
+            m = modelFromSummaryJson(JSON.parse(await file.text()));
+          } else {
+            m = modelFromTerminal(await file.text());
+          }
+          setModel(m);
+        } catch (e) {
+          $("#loadErr").textContent = "Could not read that file: " + e.message;
+        }
+        $("#loadBusy").textContent = "";
+      }
+
+      $("#parsePaste").onclick = () => {
+        const raw = $("#paste").value.trim();
+        $("#loadErr").textContent = "";
+        if (!raw) {
+          $("#loadErr").textContent = "Paste something first.";
+          return;
+        }
+        try {
+          let m;
+          if (/^\{\s*"type"\s*:/.test(raw)) {
+            const agg = ndjsonAggregator();
+            raw.split("\n").forEach(agg.push);
+            m = modelFromNdjson(agg.finish());
+          } else if (raw.startsWith("{"))
+            m = modelFromSummaryJson(JSON.parse(raw));
+          else m = modelFromTerminal(raw);
+          setModel(m);
+        } catch (e) {
+          $("#loadErr").textContent = e.message;
+        }
+      };
+      const drop = $("#drop"),
+        fileIn = $("#file");
+      drop.onclick = () => fileIn.click();
+      fileIn.onchange = () => fileIn.files[0] && handleFile(fileIn.files[0]);
+      ["dragover", "dragenter"].forEach((ev) =>
+        drop.addEventListener(ev, (e) => {
+          e.preventDefault();
+          drop.classList.add("over");
+        }),
+      );
+      ["dragleave", "drop"].forEach((ev) =>
+        drop.addEventListener(ev, (e) => {
+          e.preventDefault();
+          drop.classList.remove("over");
+        }),
+      );
+      drop.addEventListener("drop", (e) => {
+        if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+      });
+      $("#again").onclick = () => {
+        $("#dash").classList.add("hidden");
+        $("#loader").classList.remove("hidden");
+      };
+
+      $("#demo").onclick = () => {
+        // Synthetic data following the current stage plan
+        const plan = [];
+        let sec = 0;
+        let prev = 0;
+        stages.forEach((s) => {
+          const d = Math.round((parseDurMs(String(s.d)) || 0) / 1000);
+          for (let i = 1; i <= d; i++) plan.push(prev + ((s.t - prev) * i) / d);
+          prev = +s.t;
+          sec += d;
+        });
+        const total = plan.length || 180,
+          start = Date.now() - total * 1000;
+        const series = [],
+          all = [];
+        let reqs = 0,
+          peak = 0;
+        const bw = Math.max(1, Math.ceil(total / 60));
+        for (let s = 0; s < total; s += bw) {
+          const vus = Math.round(plan[Math.min(s, plan.length - 1)] || 0),
+            avg = 250 + vus * 0.9 + Math.random() * 25,
+            rps = ((vus / 1.3) * bw) / bw;
+          series.push({
+            t: s,
+            vus,
+            rps,
+            avg,
+            p95: avg * 1.12 + Math.random() * 10,
+            fail: 0,
+          });
+          reqs += rps * bw;
+          peak = Math.max(peak, rps * 1.2);
+          for (let k = 0; k < 5; k++)
+            all.push(avg + (Math.random() - 0.5) * 40);
+        }
+        all.sort((a, b) => a - b);
+        setModel({
+          source: "demo data",
+          start: new Date(start),
+          t: {
+            reqs: Math.round(reqs),
+            failed: 0,
+            avg: all.reduce((a, b) => a + b, 0) / all.length,
+            min: all[0],
+            med: pct(all, 0.5),
+            max: all[all.length - 1],
+            p90: pct(all, 0.9),
+            p95: pct(all, 0.95),
+            rps: reqs / total,
+            peakRps: peak,
+            vusMax: Math.max(...series.map((x) => x.vus)),
+            durMs: total * 1000,
+            rx: 75e6,
+            tx: 349e3,
+            checksOk: Math.round(reqs),
+            checksFail: 0,
+          },
+          thresholds: null,
+          series,
+        });
+      };
+
+      /* =========================================================
+   RESULTS: rendering
+   ========================================================= */
+      const ICON = {
+        pin: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.500a2.500 2.500 0 0 1 0 5z"/></svg>',
+        user: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.400 3.600-7 8-7s8 2.600 8 7z"/></svg>',
+        clock:
+          '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 5v5.400l3.700 2.200-.9 1.500L11 13V7z"/></svg>',
+        cal: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2zM5 9h14v11H5z"/></svg>',
+        shield:
+          '<svg viewBox="0 0 24 24"><path fill="#22c55e" d="M12 2 4 5v6c0 5 3.400 9.300 8 11 4.600-1.700 8-6 8-11V5z"/><path fill="none" stroke="#fff" stroke-width="2.400" stroke-linecap="round" stroke-linejoin="round" d="m8.500 12 2.500 2.500 4.500-5"/></svg>',
+        warn: '<svg viewBox="0 0 24 24"><path fill="#ef4444" d="M12 2 4 5v6c0 5 3.400 9.300 8 11 4.600-1.700 8-6 8-11V5z"/><path stroke="#fff" stroke-width="2.400" stroke-linecap="round" d="M12 7.500v5M12 16v.1"/></svg>',
+      };
+      const SERIES = [
+        {
+          k: "vus",
+          name: "Virtual users",
+          color: "#22d3ee",
+          axis: "r",
+          area: true,
+          on: true,
+        },
+        {
+          k: "avg",
+          name: "Avg response time",
+          color: "#22c55e",
+          axis: "l",
+          on: true,
+        },
+        {
+          k: "p95",
+          name: "p95 response time",
+          color: "#f59e0b",
+          axis: "l",
+          dash: true,
+          on: false,
+        },
+        {
+          k: "rps",
+          name: "Requests / s",
+          color: "#7c4dff",
+          axis: "r",
+          on: true,
+        },
+      ];
+      let chartData = null,
+        hoverIdx = -1,
+        chartGeom = null;
+
+      function setModel(m) {
+        model = m;
+        $("#loader").classList.add("hidden");
+        $("#dash").classList.remove("hidden");
+        showTab("results");
+        const t = m.t,
+          ok =
+            !(t.failed > 0) &&
+            (!m.thresholds || m.thresholds.every((x) => x.ok));
+        $("#meta").innerHTML = `
+    <div class="loc">${ICON.pin}<span>1 load zone (local)</span></div>
+    <div>${ICON.user}<span>${t.vusMax != null ? Math.round(t.vusMax) : "–"} VUs</span></div>
+    <div>${ICON.clock}<span>${t.durMs ? fmtDur(t.durMs) : "–"}</span></div>
+    <div>${ICON.cal}<span>${m.start.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }).toLowerCase()} at ${pad2(m.start.getHours())}:${pad2(m.start.getMinutes())}</span></div>`;
+        $("#stats").innerHTML = `
+    <div class="stat"><div class="k">REQUESTS MADE</div><div class="v">${fmtK(t.reqs)}<small>reqs</small></div></div>
+    <div class="stat ${t.failed > 0 ? "bad" : ""}"><div class="k">HTTP FAILURES</div><div class="v">${fmtK(t.failed)}<small>reqs</small></div></div>
+    <div class="stat"><div class="k">PEAK RPS</div><div class="v">${t.peakRps != null ? Math.round(t.peakRps) : t.rps != null ? Math.round(t.rps) : "–"}<small>reqs${t.peakRps == null ? " (avg)" : ""}</small></div></div>
+    <div class="stat"><div class="k">AVG RESPONSE TIME</div><div class="v">${t.avg >= 1000 ? (t.avg / 1000).toFixed(2) : Math.round(t.avg)}<small>${t.avg >= 1000 ? "s" : "ms"}</small></div></div>`;
+        $("#foot").innerHTML = `${ok ? ICON.shield : ICON.warn}
+    <span>The average response time: <b>${Math.round(t.avg)}ms</b></span><span class="sep"></span>
+    <span>Requests: <b>${Math.round(t.reqs).toLocaleString("en-US").replace(/,/g, " ")}</b></span><span class="sep"></span>
+    <span>Requests/second: <b>${t.rps != null ? Math.round(t.rps) : "–"}</b></span><span class="sep"></span>
+    <span class="muted">Source: ${esc(m.source)}</span>`;
+
+        // table: response time
+        $("#rt").innerHTML =
+          `<table><tr><th>AVG</th><th>MIN</th><th>MEDIAN</th><th>P90</th><th>P95</th><th>MAX</th></tr>
+    <tr>${[t.avg, t.min, t.med, t.p90, t.p95, t.max].map((v) => `<td>${fmtMs(v)}</td>`).join("")}</tr></table>`;
+
+        // thresholds / checks
+        let th = m.thresholds;
+        if (!th) {
+          // evaluate against settings in the build tab
+          const p95 = parseFloat($("#thP95").value) || 1000,
+            fr = (parseFloat($("#thFail").value) || 1) / 100;
+          th = [
+            {
+              metric: "http_req_duration",
+              expr: `p(95)<${p95}`,
+              ok: t.p95 < p95,
+              note: " (checked against your script settings)",
+            },
+            {
+              metric: "http_req_failed",
+              expr: `rate<${fr}`,
+              ok: t.failed / (t.reqs || 1) < fr,
+              note: " (checked against your script settings)",
+            },
+          ];
+        }
+        const rows = th
+          .map(
+            (x) =>
+              `<tr><td>${esc(x.metric)}</td><td><code>${esc(x.expr)}</code>${x.note ? `<span class="muted small">${x.note}</span>` : ""}</td><td class="${x.ok ? "ok" : "bad-t"}">${x.ok ? "✓ passed" : "✗ failed"}</td></tr>`,
+          )
+          .join("");
+        const checks =
+          t.checksOk != null
+            ? `<tr><td>checks</td><td>${Math.round(t.checksOk).toLocaleString()} passed · ${Math.round(t.checksFail || 0).toLocaleString()} failed</td><td class="${t.checksFail || 0 ? "bad-t" : "ok"}">${t.checksFail || 0 ? "✗" : "✓"}</td></tr>`
+            : "";
+        const data = `<tr><td>data</td><td>received ${fmtBytes(t.rx)} · sent ${fmtBytes(t.tx)}</td><td></td></tr>`;
+        $("#th").innerHTML =
+          `<table><tr><th>METRIC</th><th>DETAIL</th><th>RESULT</th></tr>${rows}${checks}${data}</table>`;
+
+        // chart data
+        if (m.series) {
+          chartData = m.series;
+          $("#chartNote").innerHTML = "";
+        } else {
+          // planned VU profile from the stages in the Build tab
+          const plan = [];
+          let prev = 0;
+          stages.forEach((s) => {
+            const d = Math.round((parseDurMs(String(s.d)) || 0) / 1000);
+            for (let i = 1; i <= d; i++)
+              plan.push(prev + ((s.t - prev) * i) / d);
+            prev = +s.t;
+          });
+          const step = Math.max(1, Math.ceil(plan.length / 60));
+          chartData = plan
+            .filter((_, i) => i % step === 0)
+            .map((v, i) => ({
+              t: i * step,
+              vus: v,
+              avg: null,
+              p95: null,
+              rps: null,
+            }));
+          $("#chartNote").innerHTML =
+            `<div class="note" style="margin-top:14px">This source only has final totals, so the chart shows your <b>planned</b> VU profile from the Build tab. Load <code>results.json</code> to see response time and requests/second over time.</div>`;
+        }
+        SERIES.forEach((s) => {
+          if (!chartData.some((p) => p[s.k] != null)) s.disabled = true;
+          else s.disabled = false;
+        });
+        renderLegend();
+        requestAnimationFrame(drawChart);
+      }
+
+      function renderLegend() {
+        const lg = $("#legend");
+        lg.innerHTML = "";
+        SERIES.filter((s) => !s.disabled).forEach((s) => {
+          const c = document.createElement("div");
+          c.className = "chip" + (s.on ? "" : " off");
+          c.innerHTML = `<i style="background:${s.color}"></i>${s.name}`;
+          c.onclick = () => {
+            s.on = !s.on;
+            renderLegend();
+            drawChart();
+          };
+          lg.appendChild(c);
+        });
+      }
+
+      function drawChart() {
+        if (!chartData || !model) return;
+        const cv = $("#chart");
+        if (!cv.offsetWidth) return;
+        const dpr = window.devicePixelRatio || 1,
+          W = cv.clientWidth,
+          H = cv.clientHeight;
+        cv.width = W * dpr;
+        cv.height = H * dpr;
+        const c = cv.getContext("2d");
+        c.setTransform(dpr, 0, 0, dpr, 0, 0);
+        c.clearRect(0, 0, W, H);
+        const L = 56,
+          R = 56,
+          T = 14,
+          Bm = 34,
+          pw = W - L - R,
+          ph = H - T - Bm;
+        const act = SERIES.filter((s) => s.on && !s.disabled);
+        const maxOf = (axis) => {
+          let m = 0;
+          act
+            .filter((s) => s.axis === axis)
+            .forEach((s) =>
+              chartData.forEach((p) => {
+                if (p[s.k] > m) m = p[s.k];
+              }),
+            );
+          return nice(m * 1.05);
+        };
+        const lmax = maxOf("l") || 1,
+          rmax = maxOf("r") || 1;
+        const tmax = chartData[chartData.length - 1].t || 1;
+        const X = (t) => L + (t / tmax) * pw,
+          Y = (v, mx) => T + ph - (v / mx) * ph;
+        c.font = "12px -apple-system,Segoe UI,sans-serif";
+        c.textBaseline = "middle";
+        // grid
+        const hasL = act.some((s) => s.axis === "l"),
+          hasR = act.some((s) => s.axis === "r"),
+          ticks = 4;
+        for (let i = 0; i <= ticks; i++) {
+          const y = T + ph - (i / ticks) * ph;
+          c.strokeStyle = "#ececf3";
+          c.lineWidth = 1;
+          c.beginPath();
+          c.moveTo(L, y);
+          c.lineTo(W - R, y);
+          c.stroke();
+          c.fillStyle = "#8a8aa3";
+          c.textAlign = "right";
+          if (hasL)
+            c.fillText(
+              Math.round((lmax * i) / ticks) + (i ? "ms" : "ms"),
+              L - 8,
+              y,
+            );
+          c.textAlign = "left";
+          if (hasR)
+            c.fillText(
+              String(Math.round(((rmax * i) / ticks) * 10) / 10),
+              W - R + 8,
+              y,
+            );
+        }
+        // x labels
+        c.textAlign = "center";
+        c.fillStyle = "#8a8aa3";
+        const nl = Math.min(8, chartData.length - 1) || 1;
+        for (let i = 0; i <= nl; i++) {
+          const t = (tmax * i) / nl,
+            d = new Date(model.start.getTime() + t * 1000);
+          c.fillText(
+            `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`,
+            X(t),
+            H - Bm + 18,
+          );
+        }
+        // series
+        const geom = [];
+        act.forEach((s) => {
+          const mx = s.axis === "l" ? lmax : rmax;
+          const pts = chartData
+            .filter((p) => p[s.k] != null)
+            .map((p) => [X(p.t), Y(p[s.k], mx)]);
+          if (!pts.length) return;
+          if (s.area) {
+            const g = c.createLinearGradient(0, T, 0, T + ph);
+            g.addColorStop(0, "rgba(34,211,238,.55)");
+            g.addColorStop(1, "rgba(34,211,238,.04)");
+            c.beginPath();
+            c.moveTo(pts[0][0], T + ph);
+            pts.forEach((p) => c.lineTo(p[0], p[1]));
+            c.lineTo(pts[pts.length - 1][0], T + ph);
+            c.closePath();
+            c.fillStyle = g;
+            c.fill();
+          } else if (s.k === "avg") {
+            const g = c.createLinearGradient(0, T, 0, T + ph);
+            g.addColorStop(0, "rgba(34,197,94,.28)");
+            g.addColorStop(1, "rgba(34,197,94,.02)");
+            c.beginPath();
+            c.moveTo(pts[0][0], T + ph);
+            pts.forEach((p) => c.lineTo(p[0], p[1]));
+            c.lineTo(pts[pts.length - 1][0], T + ph);
+            c.closePath();
+            c.fillStyle = g;
+            c.fill();
+          }
+          c.beginPath();
+          pts.forEach((p, i) =>
+            i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]),
+          );
+          c.strokeStyle = s.color;
+          c.lineWidth = 2;
+          c.setLineDash(s.dash ? [6, 4] : []);
+          c.lineJoin = "round";
+          c.stroke();
+          c.setLineDash([]);
+        });
+        // hover
+        if (hoverIdx >= 0 && chartData[hoverIdx]) {
+          const p = chartData[hoverIdx],
+            x = X(p.t);
+          c.strokeStyle = "#b9b9cf";
+          c.setLineDash([4, 3]);
+          c.beginPath();
+          c.moveTo(x, T);
+          c.lineTo(x, T + ph);
+          c.stroke();
+          c.setLineDash([]);
+          act.forEach((s) => {
+            if (p[s.k] == null) return;
+            const y = Y(p[s.k], s.axis === "l" ? lmax : rmax);
+            c.beginPath();
+            c.arc(x, y, 4, 0, 7);
+            c.fillStyle = "#fff";
+            c.fill();
+            c.strokeStyle = s.color;
+            c.lineWidth = 2;
+            c.stroke();
+          });
+        }
+        chartGeom = { L, pw, tmax, W, act };
+      }
+
+      $("#chart").addEventListener("mousemove", (e) => {
+        if (!chartData || !chartGeom) return;
+        const r = e.target.getBoundingClientRect(),
+          x = e.clientX - r.left,
+          g = chartGeom;
+        const t = Math.max(0, Math.min(g.tmax, ((x - g.L) / g.pw) * g.tmax));
+        let best = 0,
+          bd = 1e9;
+        chartData.forEach((p, i) => {
+          const d = Math.abs(p.t - t);
+          if (d < bd) {
+            bd = d;
+            best = i;
+          }
+        });
+        hoverIdx = best;
+        drawChart();
+        const p = chartData[best],
+          tip = $("#tip"),
+          d = new Date(model.start.getTime() + p.t * 1000);
+        tip.innerHTML =
+          `<b>${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}</b><br>` +
+          g.act
+            .filter((s) => p[s.k] != null)
+            .map(
+              (s) =>
+                `<span style="color:${s.color}">●</span> ${s.name}: ${s.axis === "l" ? Math.round(p[s.k]) + " ms" : Math.round(p[s.k] * 10) / 10}`,
+            )
+            .join("<br>");
+        tip.style.display = "block";
+        const wrap = tip.parentElement.getBoundingClientRect();
+        let left = e.clientX - wrap.left + 14;
+        if (left > wrap.width - 190) left = e.clientX - wrap.left - 190;
+        tip.style.left = left + "px";
+        tip.style.top = e.clientY - wrap.top - 20 + "px";
+      });
+      $("#chart").addEventListener("mouseleave", () => {
+        hoverIdx = -1;
+        $("#tip").style.display = "none";
+        drawChart();
+      });
+      window.addEventListener("resize", () => drawChart());
+
+      /* init */
+      renderStages();
+      update();
+    </script>
+  </body>
+</html>
