@@ -20,6 +20,6 @@ aws_profile_id = "125022369875"
 
 enable_deletion_protection = false
 
-jenkins_security_group_id = "sg-0ab19e6fa21a4ddcd"
+jenkins_security_group_id = "sg-0537e6731d7ffc34b"
 
-eks_security_group_id = "sg-018d48523f9d80e63"
+eks_security_group_id = "sg-062cbbc7b7a115747"

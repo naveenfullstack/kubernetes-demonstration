@@ -184,7 +184,7 @@ kubectl apply -f html-test.yaml
  ## Create the binding config on EKS management server
 
  ```bash
- cat <<'EOF' > html-test-tgb.yml
+ cat <<'EOF' > nextjs-website-tgb.yml
   apiVersion: elbv2.k8s.aws/v1beta1
   kind: TargetGroupBinding
   metadata:
@@ -192,7 +192,7 @@ kubectl apply -f html-test.yaml
     namespace: default
   spec:
     serviceRef:
-      name: html-test-service
+      name: nextjs-website-service
       port: 80
     targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:125022369875:targetgroup/othm-eks-tg-prod/5d984f9da6c4747a
     targetType: ip

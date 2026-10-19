@@ -18,14 +18,6 @@ pipeline {
         IMAGE_NAME = "${ECR_REGISTRY}/${ECR_REPOSITORY}"
 
         IMAGE_TAG = "${BUILD_NUMBER}"
-        
-        LB_CONTROLLER_ROLE_ARN = 'arn:aws:iam::125022369875:role/othm-lb-controller-role-prod'
-
-        EKS_VPC_ID = 'vpc-0e4ff9b74b9e7f013'
-
-        POD_MGMT_NAMESPACE = 'default'
-
-        TARGET_GROUP_ARN  = 'arn:aws:elasticloadbalancing:us-east-1:125022369875:targetgroup/othm-eks-tg-prod/5d984f9da6c4747a'
     }
 
     stages {
@@ -152,101 +144,6 @@ pipeline {
 
                         echo "Application service:"
                         kubectl get service nextjs-website-service
-                    '''
-                }
-            }
-        }
-
-        // =================================================
-        // 8. INSTALL / UPGRADE AWS LOAD BALANCER CONTROLLER
-        // =================================================
-        stage('Install AWS Load Balancer Controller') {
-            steps {
-                sh '''
-                    set -eu
-
-                    # Verify required tools
-                    command -v helm
-                    command -v kubectl
-
-                    # Add AWS EKS Helm repository
-                    helm repo add eks https://aws.github.io/eks-charts \
-                        --force-update
-
-                    helm repo update
-
-                    # Verify Kubernetes access
-                    kubectl cluster-info
-
-                    # Install or upgrade the controller
-                    helm upgrade --install aws-load-balancer-controller \
-                        eks/aws-load-balancer-controller \
-                        --namespace kube-system \
-                        --create-namespace \
-                        --set clusterName="${EKS_CLUSTER_NAME}" \
-                        --set region="${AWS_REGION}" \
-                        --set vpcId="${EKS_VPC_ID}" \
-                        --set serviceAccount.create=true \
-                        --set serviceAccount.name=aws-load-balancer-controller \
-                        --set-string "serviceAccount.annotations.eks\\\\.amazonaws\\\\.com/role-arn=${LB_CONTROLLER_ROLE_ARN}"
-
-                    # Wait for the controller to become ready
-                    kubectl rollout status \
-                        deployment/aws-load-balancer-controller \
-                        -n kube-system \
-                        --timeout=300s
-
-                    # Verify controller
-                    kubectl get deployment aws-load-balancer-controller \
-                        -n kube-system
-
-                    kubectl get serviceaccount aws-load-balancer-controller \
-                        -n kube-system
-                '''
-            }
-        }
-
-        // =================================================
-        // 8. APPLY POD MANAGEMENT RESOURCES
-        // =================================================
-        stage('Apply Pod Management') {
-            steps {
-                dir('next') {
-                    sh '''
-                        set -eu
-
-                        # Verify the manifest exists
-                        test -f k8-pods-mg.yml
-
-                        # Apply pod-management resources
-                        kubectl apply -f k8-pods-mg.yml
-
-                        # Verify application deployment
-                        kubectl rollout status \
-                            deployment/nextjs-website \
-                            --timeout=300s
-
-                        # Show application pods
-                        kubectl get pods \
-                            -l app=nextjs-website \
-                            -o wide
-
-                        # Show services
-                        kubectl get services
-
-                        # Show TargetGroupBindings across namespaces
-                        kubectl get targetgroupbindings -A
-
-                        # Verify the expected TargetGroupBinding
-                        kubectl describe targetgroupbinding \
-                            html-test-tgb \
-                            -n "${POD_MGMT_NAMESPACE}"
-
-                        # Inspect AWS Load Balancer Controller logs
-                        kubectl logs \
-                            deployment/aws-load-balancer-controller \
-                            -n kube-system \
-                            --tail=50
                     '''
                 }
             }
