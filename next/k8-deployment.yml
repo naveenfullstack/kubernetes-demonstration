@@ -6,7 +6,6 @@ metadata:
     app: nextjs-website
 
 spec:
-  replicas: 2
 
   selector:
     matchLabels:
