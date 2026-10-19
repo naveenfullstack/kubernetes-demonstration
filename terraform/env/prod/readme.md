@@ -181,6 +181,15 @@ kubectl apply -f html-test.yaml
   --set serviceAccount.name=aws-load-balancer-controller \
   --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=<LB_CONTROLER_ARN>
 
+  helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=othm-eks-prod \
+  --set region=us-east-1 \
+  --set vpcId=vpc-05b1f6a9796aa404c \
+  --set serviceAccount.create=true \
+  --set serviceAccount.name=aws-load-balancer-controller \
+  --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=arn:aws:iam::125022369875:role/othm-lb-controller-role-prod
+
  ## Create the binding config on EKS management server
 
  ```bash
@@ -194,15 +203,27 @@ kubectl apply -f html-test.yaml
     serviceRef:
       name: nextjs-website-service
       port: 80
-    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:125022369875:targetgroup/othm-eks-tg-prod/5d984f9da6c4747a
+    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:125022369875:targetgroup/othm-eks-tg-prod/18eded28dc55e8fe
     targetType: ip
 EOF
  ```
 
-## Apply the binding
+ ## Check whether the TargetGroupBinding CRD exists
+ ```bash
+ kubectl get crd targetgroupbindings.elbv2.k8s.aws
+ ```
+
+## Apply the TargetGroupBinding
 
 ```bash
-kubectl -n kube-system get deploy aws-load-balancer-controller
+kubectl apply -f nextjs-website-tgb.yml
+```
+
+## Verify the TargetGroupBinding
+```bash
+kubectl get targetgroupbinding -n default
+
+kubectl describe targetgroupbinding nextjs-website-tgb -n default
 ```
 
 ### verify
